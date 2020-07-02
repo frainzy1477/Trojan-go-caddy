@@ -114,7 +114,7 @@ cat > /home/trojan-go/config.json <<-EOF
     "prefer_server_cipher": false,
     "sni": "$your_domain",
     "alpn": [
-	  "h2",
+      "h2",
       "http/1.1"
     ],
     "session_ticket": true,
@@ -200,7 +200,7 @@ cat > /home/trojan-go/config.json <<-EOF
 EOF
 
 if [ $? = 0 ]; then
-    docker-compose up -d 
+        docker-compose up -d 
 	
 	if [ "$enable_websocket" == "true" ];then
 	$ws="ws=1"
@@ -222,7 +222,7 @@ if [ $? = 0 ]; then
 	echo "Trojan URI"
 	green "trojan://$trojan_passwd@$your_domain:443?allowinsecure=0&tfo=0&sni=$your_domain&mux=1&$ws&wss=0&wsPath=$websocket_path&wsHostname=$websocket_host&wsObfsPassword=&group=#$server_name"
 	echo "Trojan-GO URI"
-	green "trojan://$trojan_passwd@$your_domain:443?peer=#$(urlEncode "$server_name")"
+	green "trojan://$trojan_passwd@$your_domain:443?peer=#$(urlEncode "${server_nam}")"
 	echo "======================================================================"
 	if [ "$enable_ss" == "true" ];then
 	blue "Shadowsocks Method: $ss_method"
