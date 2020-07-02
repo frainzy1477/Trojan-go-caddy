@@ -1,0 +1,10 @@
+xx:80 {
+    root /usr/src/trojan
+    log /usr/src/caddy.log
+    index index.html
+}
+xx:443 {
+    root /usr/src/trojan
+    log /usr/src/caddy.log
+    index index.html
+}
