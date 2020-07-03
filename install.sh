@@ -46,10 +46,6 @@ pre_install_docker_compose
 real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
 local_addr=`curl ipv4.icanhazip.com`
 
-urlEncode() {
-  printf %s "$1" | jq -s -R -r @uri
-}
-
 
 if [ $real_addr == $local_addr ] ; then
 	echo "=========================================="
@@ -222,7 +218,7 @@ if [ $? = 0 ]; then
 	echo "Trojan URI"
 	green "trojan://$trojan_passwd@$your_domain:443?allowinsecure=0&tfo=0&sni=$your_domain&mux=1&$ws&wss=0&wsPath=$websocket_path&wsHostname=$websocket_host&wsObfsPassword=&group=#$server_name"
 	echo "Trojan-GO URI"
-	green "trojan://$trojan_passwd@$your_domain:443?peer=#$(urlEncode "${server_nam}")"
+	green "trojan://$trojan_passwd@$your_domain:443?peer=#$server_name"
 	echo "======================================================================"
 	if [ "$enable_ss" == "true" ];then
 	blue "Shadowsocks Method: $ss_method"
