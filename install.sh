@@ -199,9 +199,9 @@ if [ $? = 0 ]; then
         docker-compose up -d 
 	
 	if [ "$enable_websocket" == "true" ];then
-	$ws="ws=1"
+	ws="ws=1"
 	else
-	$ws="ws=0"
+	ws="ws=0"
 	fi
 	
 	green "======================================================================"
