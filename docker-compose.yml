@@ -9,17 +9,15 @@ services:
       volumes:
         - ./wwwroot:/usr/src
         - ./caddy/Caddyfile:/etc/Caddyfile
-        - ./ssl:/root/.caddy/acme/acme-v02.api.letsencrypt.org/sites
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
   trojan:
-      image: frainzy1477/trojan:ss
+      image: frainzy1477/trojan:latest
       restart: always
       ports:
         - "443:443"
       volumes:
         - /etc/trojan-go:/etc/trojan-go
-        - ./ssl:/ssl
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
       links:
