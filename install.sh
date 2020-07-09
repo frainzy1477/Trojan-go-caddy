@@ -63,6 +63,7 @@ fi
 if [ "$checkDockerCompose" == "" ]; then
 install_docker_compose
 fi
+install cert
 wait
 docker-compose down
 wait
@@ -102,8 +103,8 @@ cat > /etc/trojan-go/config.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "../ssl/$your_domain/$your_domain.crt",
-    "key": "../ssl/$your_domain/$your_domain.key",
+    "cert": "./$your_domain.crt",
+    "key": "./$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -268,7 +269,16 @@ function install_docker_compose(){
 	ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose     
 }
 
-
+function install cert(){
+yum -y install socat 
+curl -sL https://get.acme.sh | bash
+bash /root/.acme.sh/acme.sh --issue -d ${your_domain}  --debug --standalone --keylength ec-256
+wait
+if [ $? = 0 ]; then
+mv /root/.acme.sh/{your_domain}_ecc/{your_domain}.key /etc/trojan-go/{your_domain}.key
+mv /root/.acme.sh/{your_domain}_ecc/{your_domain}.crt /etc/trojan-go/{your_domain}.crt
+fi
+}
 
 
 pre_install_docker_compose(){   
