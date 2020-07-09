@@ -67,8 +67,8 @@ wait
 docker-compose down
 wait
 docker-compose stop
-rm -rf /home/trojan-go/caddy/Caddyfile
-cat > /home/trojan-go/caddy/Caddyfile <<-EOF
+rm -rf /etc/trojan-go/caddy/Caddyfile
+cat > /etc/trojan-go/caddy/Caddyfile <<-EOF
 ${your_domain}:80 {
     root /usr/src/trojan
     log /usr/src/caddy.log
@@ -82,8 +82,8 @@ ${your_domain}:443 {
 EOF
 
 
-rm -rf /home/trojan-go/config.json
-cat > /home/trojan-go/config.json <<-EOF
+rm -rf /etc/trojan-go/config.json
+cat > /etc/trojan-go/config.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
@@ -94,7 +94,7 @@ cat > /home/trojan-go/config.json <<-EOF
         "$trojan_passwd"
   ],
   "log_level": 1,
-  "log_file": "../trojan.log",
+  "log_file": "./trojan.log",
   "buffer_size": 32,
   "dns": ["8.8.8.8","1.1.1.1"],
   "disable_http_check": false,
@@ -196,7 +196,7 @@ cat > /home/trojan-go/config.json <<-EOF
 EOF
 
 if [ $? = 0 ]; then
-        docker-compose up -d 
+       // docker-compose up -d 
 	
 	if [ "$enable_websocket" == "true" ];then
 	ws="ws=1"
