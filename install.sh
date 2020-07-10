@@ -63,7 +63,7 @@ fi
 if [ "$checkDockerCompose" == "" ]; then
 install_docker_compose
 fi
-install cert
+
 wait
 docker-compose down
 wait
@@ -88,7 +88,7 @@ cat > /etc/trojan-go/config.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
-  "local_port": 443,
+  "local_port": 2333,
   "remote_addr": "__DOCKER_CADDY__",
   "remote_port": 80,
   "password": [
@@ -99,7 +99,7 @@ cat > /etc/trojan-go/config.json <<-EOF
   "buffer_size": 32,
   "dns": ["8.8.8.8","1.1.1.1"],
   "disable_http_check": false,
-  "udp_timeout": 30,
+  "udp_timeout": 10,
   "ssl": {
     "verify": true,
     "verify_hostname": true,
@@ -111,7 +111,6 @@ cat > /etc/trojan-go/config.json <<-EOF
     "prefer_server_cipher": false,
     "sni": "$your_domain",
     "alpn": [
-      "h2",
       "http/1.1"
     ],
     "session_ticket": true,
@@ -138,8 +137,8 @@ cat > /etc/trojan-go/config.json <<-EOF
     "block": [],
     "default_policy": "proxy",
     "domain_strategy": "as_is",
-    "geoip": "$PROGRAM_DIR$/geoip.dat",
-    "geosite": "$PROGRAM_DIR$/geosite.dat"
+    "geoip": "$/geoip.dat",
+    "geosite": "$/geosite.dat"
   },
   "websocket": {
     "enabled": $enable_websocket,
@@ -170,7 +169,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "enabled": false,
     "server_addr": "localhost",
     "server_port": 3306,
-    "database": "trojan",
+    "database": "atlx2019",
     "username": "root",
     "password": "Eh65cCDX8ARl",
     "check_rate": 30
@@ -194,10 +193,11 @@ cat > /etc/trojan-go/config.json <<-EOF
     }
   }
 }
+
 EOF
 
 if [ $? = 0 ]; then
-       // docker-compose up -d 
+    // docker-compose up -d 
 	
 	if [ "$enable_websocket" == "true" ];then
 	ws="ws=1"
@@ -269,16 +269,7 @@ function install_docker_compose(){
 	ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose     
 }
 
-function install cert(){
-yum -y install socat 
-curl -sL https://get.acme.sh | bash
-bash /root/.acme.sh/acme.sh --issue -d ${your_domain}  --debug --standalone --keylength ec-256
-wait
-if [ $? = 0 ]; then
-mv /root/.acme.sh/{your_domain}_ecc/{your_domain}.key /etc/trojan-go/{your_domain}.key
-mv /root/.acme.sh/{your_domain}_ecc/{your_domain}.crt /etc/trojan-go/{your_domain}.crt
-fi
-}
+
 
 
 pre_install_docker_compose(){   

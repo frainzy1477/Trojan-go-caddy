@@ -5,19 +5,22 @@ services:
       image: frainzy1477/caddy
       ports:
         - "80:80"
+        - "443:443"
       restart: always
       volumes:
         - ./wwwroot:/usr/src
+        - ./ssl:/root/.caddy/acme/acme-v02.api.letsencrypt.org/sites
         - ./caddy/Caddyfile:/etc/Caddyfile
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
   trojan:
-      image: frainzy1477/trojan:latest
+      image: frainzy1477/trojan:dev
       restart: always
       ports:
-        - "443:443"
+        - "2333:2333"
       volumes:
         - /etc/trojan-go:/etc/trojan-go
+        - ./ssl:/ssl
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
       links:
