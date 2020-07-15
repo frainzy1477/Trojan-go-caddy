@@ -5,7 +5,6 @@ services:
       image: frainzy1477/caddy
       ports:
         - "80:80"
-        - "443:443"
       restart: always
       volumes:
         - ./wwwroot:/usr/src
@@ -14,10 +13,10 @@ services:
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
   trojan:
-      image: frainzy1477/trojan:dev
+      image: frainzy1477/trojan-plugin:latest
       restart: always
       ports:
-        - "2333:2333"
+        - "443:443"
       volumes:
         - /etc/trojan-go:/etc/trojan-go
         - ./ssl:/ssl
