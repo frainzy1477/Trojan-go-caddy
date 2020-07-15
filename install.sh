@@ -201,14 +201,6 @@ pre_install_docker_compose(){
     echo "Domain Name = $your_domain"
     echo "---------------------------"
     echo
-    
-    green "Please enter the sever remarks"
-    read -p "(There is no default value please make sure you input the right thing):" server_name
-    echo
-    echo "---------------------------"
-    echo "Trojan Server Name = ${server_name}"
-    echo "---------------------------"
-    echo
 
     green "Enable Mux"
     read -p "(Default : false 'true/false'):" enable_mux
