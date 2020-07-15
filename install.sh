@@ -145,7 +145,7 @@ cat > /etc/trojan-go/config.json <<-EOF
   "webapi":{
     "enabled": $enable_webapi, 
     "node_id":   $node_id,
-    "panelUrl": "panelurl",
+    "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
     "check_rate": $check_rate,
     "speedtestRate": $speedtestRate
