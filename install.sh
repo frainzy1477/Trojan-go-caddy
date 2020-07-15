@@ -154,45 +154,9 @@ cat > /etc/trojan-go/config.json <<-EOF
 EOF
 
 if [ $? = 0 ]; then
-    // docker-compose up -d 
-	
-	if [ "$enable_websocket" == "true" ];then
-	ws="ws=1"
-	else
-	ws="ws=0"
-	fi
-	
 	green "======================================================================"
-	green "Trojan installation complete"
-	blue "Domain:$your_domain"
-	blue "Password: $trojan_passwd"
-	blue "Port: 443"
-	blue "Server Name: $server_name"
-	if [ "$enable_websocket" == "true" ];then
-	blue "Websocket Path:$websocket_path"
-	blue "Websocket Hostname: $websocket_host"
-	fi
+	green "Trojan installation complete, run docker-compose up o start"
 	echo "======================================================================"
-	echo "Trojan URI"
-	green "trojan://$trojan_passwd@$your_domain:443?allowinsecure=0&tfo=0&sni=$your_domain&mux=1&$ws&wss=0&wsPath=$websocket_path&wsHostname=$websocket_host&wsObfsPassword=&group=#$server_name"
-	echo "Trojan-GO URI"
-	green "trojan://$trojan_passwd@$your_domain:443?peer=#$server_name"
-	echo "======================================================================"
-	if [ "$enable_ss" == "true" ];then
-	blue "Shadowsocks Method: $ss_method"
-	blue "Shadowsocks Password: $ss_password"
-	if [ "$plugin_type" == "shadowsocks" ];then
-	blue "Shadowsocks SIP003 Plug-in: $plugin_option"
-	fi
-	echo "======================================================================"
-	fi
-	if [ "$forward_proxy" == "true" ];then
-	blue "Socks5 Address: $proxy_addr"
-	blue "Socks5 Port : $proxy_port "
-	blue "Socks5 Username: $username "
-	blue "Socks5 Password: $password "
-	echo "======================================================================"
-	fi
 fi	
 else
 	echo "================================"
@@ -200,7 +164,6 @@ else
 	red "This installation failed, please make sure the domain name resolution is normal"
 	echo "================================"
 fi
-
 
 }
 
@@ -236,14 +199,6 @@ pre_install_docker_compose(){
     echo
     echo "---------------------------"
     echo "Domain Name = $your_domain"
-    echo "---------------------------"
-    echo
-    
-    green "Please enter the password of the trojan server"
-    read -p "(There is no default value please make sure you input the right thing):" trojan_passwd
-    echo
-    echo "---------------------------"
-    echo "Trojan Password = ${trojan_passwd}"
     echo "---------------------------"
     echo
     
