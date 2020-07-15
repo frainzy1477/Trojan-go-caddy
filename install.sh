@@ -88,23 +88,20 @@ cat > /etc/trojan-go/config.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
-  "local_port": 2333,
+  "local_port": 443,
   "remote_addr": "__DOCKER_CADDY__",
   "remote_port": 80,
-  "password": [
-        "$trojan_passwd"
-  ],
+  "password": [],
   "log_level": 1,
-  "log_file": "./trojan.log",
   "buffer_size": 32,
   "dns": ["8.8.8.8","1.1.1.1"],
   "disable_http_check": false,
-  "udp_timeout": 10,
+  "udp_timeout": 30,
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "./$your_domain.crt",
-    "key": "./$your_domain.key",
+    "cert": "../ssl/$your_domain/$your_domain.crt",
+    "key": "../ssl/$your_domain/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -126,7 +123,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "prefer_ipv4": false
   },
   "mux": {
-    "enabled": true,
+    "enabled": $enable_mux,
     "concurrency": 8,
     "idle_timeout": 60
   },
@@ -145,55 +142,15 @@ cat > /etc/trojan-go/config.json <<-EOF
     "path": "$websocket_path",
     "hostname": "$websocket_host"
   },
-  "shadowsocks": {
-    "enabled": $enable_ss,
-    "method": "$ss_method",
-    "password": "$ss_password"
-  },
-  "transport_plugin": {
-    "enabled": $enable_tp,
-    "type": "$plugin_type",
-    "command": "",
-    "plugin_option": "$plugin_option",
-    "arg": [],
-    "env": []
-  },
-  "forward_proxy": {
-    "enabled": $forward_proxy,
-    "proxy_addr": "$proxy_addr",
-    "proxy_port": $proxy_port,
-    "username": "$username",
-    "password": "$password"
-  },
-  "mysql": {
-    "enabled": false,
-    "server_addr": "localhost",
-    "server_port": 3306,
-    "database": "atlx2019",
-    "username": "root",
-    "password": "Eh65cCDX8ARl",
-    "check_rate": 30
-  },
-  "redis": {
-    "enabled": false,
-    "server_addr": "localhost",
-    "server_port": 6379,
-    "password": ""
-  },
-  "api": {
-    "enabled": false,
-    "api_addr": "127.0.0.1",
-    "api_port": 10000,
-    "ssl": {
-      "enabled": false,
-      "key": "",
-      "cert": "",
-      "verify_client": false,
-      "client_cert": []
-    }
+  "webapi":{
+    "enabled": $enable_webapi, 
+    "node_id":   $node_id,
+    "panelUrl": "panelurl",
+    "panelKey": "$panelkey",
+    "check_rate": $check_rate,
+    "speedtestRate": $speedtestRate
   }
 }
-
 EOF
 
 if [ $? = 0 ]; then
@@ -298,6 +255,18 @@ pre_install_docker_compose(){
     echo "---------------------------"
     echo
 
+    green "Enable Mux"
+    read -p "(Default : false 'true/false'):" enable_mux
+    if [ -z "$enable_mux" ];then 
+	enable_mux="false"
+	fi
+    echo
+    echo "---------------------------"
+    echo "Enable Mux = $enable_mux"
+    echo "---------------------------"
+    echo
+    
+    
     green "Enable websocket"
     read -p "(Default : false 'true/false'):" enable_websocket
     if [ -z "$enable_websocket" ];then 
@@ -333,132 +302,70 @@ pre_install_docker_compose(){
     echo     
     fi
     
-    green "Enable Shadowsocks"
-    read -p "(Default : false 'true/false'):" enable_ss
-    if [ -z "$enable_ss" ];then
-	enable_ss="false"
+    green "Enable WebApi"
+    read -p "(Default : false 'true/false'):" enable_webapi
+    if [ -z "$enable_webapi" ];then
+	enable_webapi="false"
 	fi
     echo
     echo "---------------------------"
-    echo "Enable Shadowsocks = $enable_ss"
+    echo "Enable WebApi = $enable_webapi"
     echo "---------------------------"
     echo  
     
-    if [ "$enable_ss" == "true" ];then
-	green "Shadowsocks Method"
-    read -p "(Default : AES-128-GCM 'CHACHA20-IETF-POLY1305 / AES-128-GCM / AES-256-GCM'):" ss_method
-    if [ -z "$ss_method" ];then
-	ss_method="AES-128-GCM"
-	fi
+    if [ "$enable_webapi" == "true" ];then
+	green "PanelUrl"
+    read -p "(Default : No default value):" panelurl
     echo
     echo "---------------------------"
-    echo "Shadowsocks Method = $ss_method"
+    echo "PanelUrl = $panelurl"
     echo "---------------------------"
     echo 
 	
 	
-    green "Shadowsocks Password"
-    read -p "(Default Password: zCR&3n*E7dut#1^tu$ ):" ss_password
-    if [ -z "$ss_password" ];then
-	ss_password="zCR&3n*E7dut#1^tu$"
-	fi
+    green "PanelKey"
+    read -p "(Default: No default value):" panelkey
     echo
     echo "---------------------------"
-    echo "Shadowsocks Password = $ss_password"
+    echo "PanelKey = $panelkey"
     echo "---------------------------"
     echo 
     
-    green "Enable Transport Plugin"
-    read -p "(Default : false 'false/true'):" enable_tp
-    if [ -z "$enable_tp" ];then
-	enable_tp="false"
+    green "Node Id"
+    read -p "(Default : 1 ):" node_id
+    if [ -z "$node_id" ];then
+	node_id=1
 	fi
     echo
     echo "---------------------------"
-    echo "Enable Transport Plugin = $enable_tp"
+    echo "Enable Transport Plugin = $node_id"
     echo "---------------------------"
     echo 
     
-    if [ "$enable_tp" == "true" ];then
-	
-	green "Plugin Type"
-    read -p "(Default : plaintext 'shadowsocks / plaintext / other' ):" plugin_type
-    if [ -z "$plugin_type" ];then
-	plugin_type="plaintext"
+        green "Check Rate"
+    read -p "(Default : 60 ):" check_rate
+    if [ -z "$check_rate" ];then
+	check_rate=60
 	fi
     echo
     echo "---------------------------"
-    echo "Plugin Option = $plugin_type"
+    echo "Check Rate = $check_rate"
     echo "---------------------------"
     echo 
-	
-	
-	if [ "$plugin_type" == "shadowsocks" ];then
-    green "Plugin Option"
-    read -p "(Default : obfs=http;obfs-host=www.baidu.com ):" plugin_option
-    if [ -z "$plugin_option" ];then 
-	plugin_option="obfs=http;obfs-host=www.baidu.com"
+    
+        green "SpeedtestRate"
+    read -p "(Default : 6 ):" speedtestRate
+    if [ -z "$speedtestRate" ];then
+	speedtestRate=6
 	fi
     echo
     echo "---------------------------"
-    echo "Plugin Option = $plugin_option"
+    echo "SpeedtestRate = $speedtestRate"
     echo "---------------------------"
-    echo
-	
-	fi
+    echo 
+
     fi
-    fi
-    
-    green "Enable Forward Proxy (socks5)"
-    read -p "(Default : false  'false/true'):" forward_proxy
-    if [ -z "$forward_proxy" ];then
-	forward_proxy="false"
-	fi
-    echo
-    echo "---------------------------"
-    echo "Enable Forward Proxy(socks5) = $forward_proxy"
-    echo "---------------------------"
-    echo 
-    
-    if [ "$forward_proxy" == "true" ];then
-    green "Proxy Address"
-    read -p "(Default : ${your_domain} ):" proxy_addr
-    if [ -z "$proxy_addr" ];then
-	proxy_addr="$your_domain"
-	fi
-    echo
-    echo "---------------------------"
-    echo "Proxy Address = $proxy_addr"
-    echo "---------------------------"
-    echo 
-    
-    green "Proxy Port"
-    read -p "(Default : 1080 ):" proxy_port
-    if [ -z "$proxy_port" ];then
-	proxy_port="1080"
-	fi
-    echo
-    echo "---------------------------"
-    echo "Proxy Port = $proxy_port"
-    echo "---------------------------"
-    echo 
-    
-    green "Username"
-    read -p "(Default :  ):" username
-    echo
-    echo "---------------------------"
-    echo "Username = $username"
-    echo "---------------------------"
-    echo 
-    
-    green "Password"
-    read -p "(Default :  ):" password
-    echo
-    echo "---------------------------"
-    echo "Password = $password"
-    echo "---------------------------"
-    echo 
-    fi
+
 }   
 
 start_menu(){
