@@ -76,7 +76,7 @@ docker-compose down
 wait
 docker-compose stop
 
-mkdir -r /etc/trojan-go/caddy
+mkdir -p /etc/trojan-go/caddy
 rm -rf /etc/trojan-go/caddy/Caddyfile 2>/dev/null
 
 cat > /etc/trojan-go/caddy/Caddyfile <<-EOF
@@ -115,7 +115,7 @@ services:
       volumes:
         - ./wwwroot:/usr/src
         - ./ssl:/root/.caddy/acme/acme-v02.api.letsencrypt.org/sites
-        - ./Caddyfile:/etc/Caddyfile
+        - ./caddy/Caddyfile:/etc/Caddyfile
         - /etc/localtime:/etc/localtime:ro
         - /etc/timezone:/etc/timezone:ro
   trojan:
