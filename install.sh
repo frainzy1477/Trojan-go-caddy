@@ -79,21 +79,21 @@ docker-compose stop
 rm -rf /etc/trojan-go/Caddyfile 2>/dev/null
 
 cat > /etc/trojan-go/Caddyfile <<-EOF
-${your_domain}:80 {
+$your_domain:80 {
     root /usr/src/trojan
     log /usr/src/caddy.log
     index index.html
-    proxy ${websocket_path} 127.0.0.1:${$port} {
+    proxy $websocket_path 127.0.0.1:$port {
      websocket
      header_upstream -Origin
     }
     gzip    
 }
-${your_domain}:443 {
+$your_domain:443 {
     root /usr/src/trojan
     log /usr/src/caddy.log
     index index.html
-    proxy ${websocket_path} 127.0.0.1:${$port} {
+    proxy $websocket_path 127.0.0.1:$port {
      websocket
      header_upstream -Origin
     }
