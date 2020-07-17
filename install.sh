@@ -143,7 +143,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "hostname": "$websocket_host"
   },
   "webapi":{
-    "enabled": $enable_webapi, 
+    "enabled": true, 
     "node_id":   $node_id,
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
@@ -249,19 +249,7 @@ pre_install_docker_compose(){
     echo     
     fi
     
-    green "Enable WebApi"
-    read -p "(Default : false 'true/false'):" enable_webapi
-    if [ -z "$enable_webapi" ];then
-	enable_webapi="false"
-	fi
-    echo
-    echo "---------------------------"
-    echo "Enable WebApi = $enable_webapi"
-    echo "---------------------------"
-    echo  
-    
-    if [ "$enable_webapi" == "true" ];then
-	green "PanelUrl"
+    green "PanelUrl"
     read -p "(Default : No default value):" panelurl
     echo
     echo "---------------------------"
@@ -289,7 +277,7 @@ pre_install_docker_compose(){
     echo "---------------------------"
     echo 
     
-        green "Check Rate"
+    green "Check Rate"
     read -p "(Default : 60 ):" check_rate
     if [ -z "$check_rate" ];then
 	check_rate=60
@@ -300,7 +288,7 @@ pre_install_docker_compose(){
     echo "---------------------------"
     echo 
     
-        green "SpeedtestRate"
+    green "SpeedtestRate"
     read -p "(Default : 6 ):" speedtestRate
     if [ -z "$speedtestRate" ];then
 	speedtestRate=6
@@ -311,7 +299,7 @@ pre_install_docker_compose(){
     echo "---------------------------"
     echo 
 
-    fi
+
 
 }   
 
