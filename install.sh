@@ -76,9 +76,10 @@ docker-compose down
 wait
 docker-compose stop
 
-rm -rf /etc/trojan-go/Caddyfile 2>/dev/null
+mkdir -r /etc/trojan-go/caddy
+rm -rf /etc/trojan-go/caddy/Caddyfile 2>/dev/null
 
-cat > /etc/trojan-go/Caddyfile <<-EOF
+cat > /etc/trojan-go/caddy/Caddyfile <<-EOF
 $your_domain:80 {
     root /usr/src/trojan
     log /usr/src/caddy.log
@@ -98,7 +99,6 @@ $your_domain:443 {
      header_upstream -Origin
     }
     gzip
-    tls
 }
 EOF
 
