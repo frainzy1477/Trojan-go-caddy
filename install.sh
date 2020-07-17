@@ -76,7 +76,7 @@ docker-compose down
 wait
 docker-compose stop
 
-rm -rf /etc/trojan-go/Caddyfile
+rm -rf /etc/trojan-go/Caddyfile 2>/dev/null
 
 cat > /etc/trojan-go/Caddyfile <<-EOF
 ${your_domain}:80 {
@@ -102,7 +102,7 @@ ${your_domain}:443 {
 }
 EOF
 
-rm -rf /etc/trojan-go/docker-compose.yml
+rm -rf /etc/trojan-go/docker-compose.yml 2>/dev/null
 cat > /etc/trojan-go/docker-compose.yml <<-EOF
 version: '2'
 
@@ -135,7 +135,7 @@ services:
 EOF
 
 
-rm -rf /etc/trojan-go/config.json
+rm -rf /etc/trojan-go/config.json 2>/dev/null
 cat > /etc/trojan-go/config.json <<-EOF
 {
   "run_type": "server",
@@ -207,7 +207,10 @@ EOF
 
 if [ $? = 0 ]; then
 	green "======================================================================"
-	green "Trojan installation complete, run docker-compose up o start"
+	green "Trojan installation complete"
+	green "Run docker-compose up to start server"
+	blue "Run docker-compose pull to update server"
+	red "Run docker-compose down to stop server"
 	echo "======================================================================"
 fi	
 else
