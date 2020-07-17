@@ -23,12 +23,12 @@ function install_trojan(){
 	systemPackage="apt-get"
 	fi
 	
-systemctl stop firewalld
-systemctl mask firewalld
+systemctl stop firewalld >/dev/null 2>&1
+systemctl mask firewalld >/dev/null 2>&1
 
 yum install iptables-services -y
-chkconfig iptables on
-systemctl start iptables
+chkconfig iptables on >/dev/null 2>&1
+systemctl start iptables >/dev/null 2>&1
 
 Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
 Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
@@ -112,7 +112,7 @@ services:
       image: frainzy1477/trojan-go:plugin
       restart: always
       ports:
-        - "$port:$port"
+        - "443:443"
       volumes:
         - /etc/trojan-go:/etc/trojan-go
         - ./ssl:/ssl
@@ -130,7 +130,7 @@ cat > /etc/trojan-go/config.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
-  "local_port": $port,
+  "local_port": 443,
   "remote_addr": "__DOCKER_CADDY__",
   "remote_port": 80,
   "password": [],
@@ -156,7 +156,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "reuse_session": true,
     "plain_http_response": "tcp",
     "fallback_addr": "$your_domain",
-    "fallback_port": 80,
+    "fallback_port": 443,
     "fingerprint": "firefox"
   },
   "tcp": {
@@ -246,17 +246,6 @@ pre_install_docker_compose(){
     echo "Domain Name = $your_domain"
     echo "---------------------------"
     echo
-
-    green "Trojan Listening Port"
-    read -p "(Default : 443 ):" port
-    if [ -z "$port" ];then
-	port=443
-	fi
-    echo
-    echo "---------------------------"
-    echo "Trojan Listening Port = $port"
-    echo "---------------------------"
-    echo 
     
     green "Enable Mux"
     read -p "(Default : false 'true/false'):" enable_mux
