@@ -23,6 +23,13 @@ function install_trojan(){
 	systemPackage="apt-get"
 	fi
 	
+systemctl stop firewalld
+systemctl mask firewalld
+
+yum install iptables-services -y
+chkconfig iptables on
+systemctl start iptables
+
 Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
 Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
 if [ -n "$Port80" ]; then
@@ -68,18 +75,63 @@ wait
 docker-compose down
 wait
 docker-compose stop
-rm -rf /etc/trojan-go/caddy/Caddyfile
-cat > /etc/trojan-go/caddy/Caddyfile <<-EOF
+
+rm -rf /etc/trojan-go/Caddyfile
+
+cat > /etc/trojan-go/Caddyfile <<-EOF
 ${your_domain}:80 {
     root /usr/src/trojan
     log /usr/src/caddy.log
     index index.html
+    proxy ${websocket_path} 127.0.0.1:${$port} {
+     websocket
+     header_upstream -Origin
+    }
+    gzip    
 }
 ${your_domain}:443 {
     root /usr/src/trojan
     log /usr/src/caddy.log
     index index.html
+    proxy ${websocket_path} 127.0.0.1:${$port} {
+     websocket
+     header_upstream -Origin
+    }
+    gzip
+    tls
 }
+EOF
+
+rm -rf /etc/trojan-go/docker-compose.yml
+cat > /etc/trojan-go/docker-compose.yml <<-EOF
+version: '2'
+
+services:
+  caddy:
+      image: frainzy1477/caddy
+      ports:
+        - "80:80"
+      restart: always
+      volumes:
+        - ./wwwroot:/usr/src
+        - ./ssl:/root/.caddy/acme/acme-v02.api.letsencrypt.org/sites
+        - ./Caddyfile:/etc/Caddyfile
+        - /etc/localtime:/etc/localtime:ro
+        - /etc/timezone:/etc/timezone:ro
+  trojan:
+      image: frainzy1477/trojan-go:plugin
+      restart: always
+      ports:
+        - "$port:$port"
+      volumes:
+        - /etc/trojan-go:/etc/trojan-go
+        - ./ssl:/ssl
+        - /etc/localtime:/etc/localtime:ro
+        - /etc/timezone:/etc/timezone:ro
+      links:
+        - caddy:__DOCKER_CADDY__
+      depends_on: 
+          - caddy
 EOF
 
 
@@ -88,7 +140,7 @@ cat > /etc/trojan-go/config.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
-  "local_port": 443,
+  "local_port": $port,
   "remote_addr": "__DOCKER_CADDY__",
   "remote_port": 80,
   "password": [],
@@ -182,7 +234,7 @@ function install_docker_compose(){
 	
 	$systemPackage install -y epel-release
  	$systemPackage -y update
-	$systemPackage -y install  git python-tools python-pip
+	$systemPackage -y install  git python-tools python-pip curl wget unzip zip
 	wait
     curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 	chmod +x /usr/local/bin/docker-compose
@@ -202,6 +254,17 @@ pre_install_docker_compose(){
     echo "---------------------------"
     echo
 
+    green "Trojan Listening Port"
+    read -p "(Default : 443 ):" port
+    if [ -z "$port" ];then
+	port=443
+	fi
+    echo
+    echo "---------------------------"
+    echo "Trojan Listening Port = $port"
+    echo "---------------------------"
+    echo 
+    
     green "Enable Mux"
     read -p "(Default : false 'true/false'):" enable_mux
     if [ -z "$enable_mux" ];then 
