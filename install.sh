@@ -83,22 +83,12 @@ cat > /etc/trojan-go/caddy/Caddyfile <<-EOF
 $your_domain:80 {
     root /usr/src/trojan
     log /usr/src/caddy.log
-    index index.html
-    proxy $websocket_path 127.0.0.1:$port {
-     websocket
-     header_upstream -Origin
-    }
-    gzip    
+    index index.html    
 }
 $your_domain:443 {
     root /usr/src/trojan
     log /usr/src/caddy.log
     index index.html
-    proxy $websocket_path 127.0.0.1:$port {
-     websocket
-     header_upstream -Origin
-    }
-    gzip
 }
 EOF
 
@@ -166,7 +156,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "reuse_session": true,
     "plain_http_response": "tcp",
     "fallback_addr": "$your_domain",
-    "fallback_port": 443,
+    "fallback_port": 80,
     "fingerprint": "firefox"
   },
   "tcp": {
