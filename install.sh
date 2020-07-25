@@ -149,11 +149,13 @@ function download(){
 	if [[ ! -f "/etc/systemd/system/trojan-go.service" ]]; then
             if [[ ! -f "/lib/systemd/system/trojan-go.service" ]]; then
                 cp /tmp/trojan-go/example/trojan-go.service /etc/systemd/system/
+		chmod +x /etc/systemd/system/trojan-go.service
 		if [ $? = 0 ]; then
                 systemctl enable trojan-go.service
 		fi
             fi
         fi
+	rm -rf /tmp/trojan-go
 	
 	curl -sL https://get.acme.sh | bash
 	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
