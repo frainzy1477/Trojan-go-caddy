@@ -26,7 +26,7 @@ function install_trojan(){
 systemctl stop firewalld >/dev/null 2>&1
 systemctl mask firewalld >/dev/null 2>&1
 
-yum install iptables-services -y
+yum install iptables-services -y >/dev/null 2>&1
 chkconfig iptables on >/dev/null 2>&1
 systemctl start iptables >/dev/null 2>&1
 
