@@ -136,8 +136,9 @@ function download(){
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
 	
-	rm -rf /tmp/trojan-go
+	rm -rf /tmp/trojan-go /etc/trojan-go
 	mkdir -p /tmp/trojan-go
+	mkdir -p /etc/trojan-go
 	cd /tmp/trojan-go
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.1/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
@@ -292,7 +293,7 @@ start_menu(){
     green " *Please do not have other programs occupying ports 80 and 443 "
     echo " ======================================= "
     echo
-    green " 1. Install trojan/caddy server "
+    green " 1. Install trojan-go"
     red " 0. Quit"
     echo
     read -p "Please enter the number:" num
