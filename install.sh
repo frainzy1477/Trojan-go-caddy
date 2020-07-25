@@ -48,7 +48,7 @@ if [ -n "$Port443" ]; then
 fi
 
   
-pre_install   >/dev/null 2>&1
+pre_install  
    
 real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
 local_addr=`curl ipv4.icanhazip.com`
@@ -62,7 +62,7 @@ if [ $real_addr == $local_addr ] ; then
 	
  
 
-download >/dev/null 2>&1
+download 
 
 
 rm -rf /etc/trojan-go/config.json 2>/dev/null
