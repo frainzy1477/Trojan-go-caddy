@@ -131,7 +131,7 @@ cat > /etc/trojan-go/config.json <<-EOF
 }
 EOF
 
-function download(){
+download(){
 	$systemPackage install -y epel-release
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
