@@ -48,7 +48,7 @@ if [ -n "$Port443" ]; then
 fi
 
   
-pre_install_docker_compose   
+pre_install   >/dev/null 2>&1
    
 real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
 local_addr=`curl ipv4.icanhazip.com`
@@ -60,69 +60,9 @@ if [ $real_addr == $local_addr ] ; then
 	echo "=========================================="
 	sleep 1s
 	
-$systemPackage -y install curl git  >/dev/null 2>&1
+ 
 
-checkDocker=$(which docker)
-checkDockerCompose=$(which docker-compose)
-if [ "$checkDocker" == "" ]; then
-install_docker
-fi
-if [ "$checkDockerCompose" == "" ]; then
-install_docker_compose
-fi
-
-wait
-docker-compose down
-wait
-docker-compose stop
-
-mkdir -p /etc/trojan-go/caddy
-rm -rf /etc/trojan-go/caddy/Caddyfile 2>/dev/null
-
-cat > /etc/trojan-go/caddy/Caddyfile <<-EOF
-$your_domain:80 {
-    root /usr/src/trojan
-    log /usr/src/caddy.log
-    index index.html    
-}
-$your_domain:443 {
-    root /usr/src/trojan
-    log /usr/src/caddy.log
-    index index.html
-}
-EOF
-
-rm -rf /etc/trojan-go/docker-compose.yml 2>/dev/null
-cat > /etc/trojan-go/docker-compose.yml <<-EOF
-version: '2'
-
-services:
-  caddy:
-      image: frainzy1477/caddy
-      ports:
-        - "80:80"
-      restart: always
-      volumes:
-        - ./wwwroot:/usr/src
-        - ./ssl:/root/.caddy/acme/acme-v02.api.letsencrypt.org/sites
-        - ./caddy/Caddyfile:/etc/Caddyfile
-        - /etc/localtime:/etc/localtime:ro
-        - /etc/timezone:/etc/timezone:ro
-  trojan:
-      image: frainzy1477/trojan-go:plugin
-      restart: always
-      ports:
-        - "443:443"
-      volumes:
-        - /etc/trojan-go:/etc/trojan-go
-        - ./ssl:/ssl
-        - /etc/localtime:/etc/localtime:ro
-        - /etc/timezone:/etc/timezone:ro
-      links:
-        - caddy:__DOCKER_CADDY__
-      depends_on: 
-          - caddy
-EOF
+download >/dev/null 2>&1
 
 
 rm -rf /etc/trojan-go/config.json 2>/dev/null
@@ -131,19 +71,19 @@ cat > /etc/trojan-go/config.json <<-EOF
   "run_type": "server",
   "local_addr": "0.0.0.0",
   "local_port": 443,
-  "remote_addr": "__DOCKER_CADDY__",
+  "remote_addr": "127.0.0.1",
   "remote_port": 80,
   "password": [],
   "log_level": 1,
   "buffer_size": 32,
   "dns": ["8.8.8.8","1.1.1.1"],
-  "disable_http_check": false,
+  "disable_http_check": true,
   "udp_timeout": 30,
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "../ssl/$your_domain/$your_domain.crt",
-    "key": "../ssl/$your_domain/$your_domain.key",
+    "cert": "/etc/trojan-go/$your_domain.crt",
+    "key": "/etc/trojan-go/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -155,7 +95,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "session_ticket": true,
     "reuse_session": true,
     "plain_http_response": "tcp",
-    "fallback_addr": "$your_domain",
+    "fallback_addr": "www.cloudflare.com",
     "fallback_port": 443,
     "fingerprint": "firefox"
   },
@@ -170,14 +110,11 @@ cat > /etc/trojan-go/config.json <<-EOF
     "idle_timeout": 60
   },
   "router": {
-    "enabled": false,
-    "bypass": [],
-    "proxy": [],
-    "block": [],
+    "enabled": true,
     "default_policy": "proxy",
     "domain_strategy": "as_is",
-    "geoip": "$/geoip.dat",
-    "geosite": "$/geosite.dat"
+    "geoip": "/etc/trojan-go/geoip.dat",
+    "geosite": "/etc/trojan-go/geosite.dat"
   },
   "websocket": {
     "enabled": $enable_websocket,
@@ -189,18 +126,49 @@ cat > /etc/trojan-go/config.json <<-EOF
     "node_id":   $node_id,
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
-    "check_rate": $check_rate,
-    "speedtestRate": $speedtestRate
+    "check_rate": $check_rate
   }
 }
 EOF
 
+function download(){
+	$systemPackage install -y epel-release
+ 	$systemPackage -y update
+	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
+	
+	rm -rf /tmp/trojan-go
+	mkdir -p /tmp/trojan-go
+	cd /tmp/trojan-go
+	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.1/trojan-go-linux-amd64.zip
+	unzip trojan-go-linux-amd64
+	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
+	cp /tmp/trojan-go/geosite.dat /etc/trojan-go/
+	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
+	chmod +x /etc/trojan-go/trojan-go
+	
+	if [[ ! -f "/etc/systemd/system/trojan-go.service" ]]; then
+            if [[ ! -f "/lib/systemd/system/trojan-go.service" ]]; then
+                cp /tmp/trojan-go/example/trojan-go.service /etc/systemd/system/
+		if [ $? = 0 ]; then
+                systemctl enable trojan-go.service
+		fi
+            fi
+        fi
+	
+	curl -sL https://get.acme.sh | bash
+	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
+	
+	ln -s /etc/trojan-go/$your_domain.crt /root/.acme.sh/$your_domain_ecc/fullchain.cer
+	ln -s /etc/trojan-go/$your_domain.key /root/.acme.sh/$your_domain_ecc/$your_domain.key
+	
+
+}
+
+
 if [ $? = 0 ]; then
+	systemctl start trojan-go
 	green "======================================================================"
 	green "Trojan installation complete"
-	green "Run docker-compose up to start server"
-	blue "Run docker-compose pull to update server"
-	red "Run docker-compose down to stop server"
 	echo "======================================================================"
 fi	
 else
@@ -213,31 +181,9 @@ fi
 }
 
 
-function install_docker(){
-
-curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-systemctl start docker
-systemctl enable docker
-usermod -aG docker $USER
-
-}
-
-function install_docker_compose(){
-
-	
-	$systemPackage install -y epel-release
- 	$systemPackage -y update
-	$systemPackage -y install  git python-tools python-pip curl wget unzip zip
-	wait
-    curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-	chmod +x /usr/local/bin/docker-compose
-	ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose     
-}
 
 
-
-
-pre_install_docker_compose(){   
+pre_install(){   
  
     green "Please enter the domain name bound to this VPS"
     read -p "(There is no default value please make sure you input the right thing):" your_domain
@@ -332,20 +278,6 @@ pre_install_docker_compose(){
     echo "Check Rate = $check_rate"
     echo "---------------------------"
     echo 
-    
-    green "SpeedtestRate"
-    read -p "(Default : 6 ):" speedtestRate
-    if [ -z "$speedtestRate" ];then
-	speedtestRate=6
-	fi
-    echo
-    echo "---------------------------"
-    echo "SpeedtestRate = $speedtestRate"
-    echo "---------------------------"
-    echo 
-
-
-
 }   
 
 start_menu(){
