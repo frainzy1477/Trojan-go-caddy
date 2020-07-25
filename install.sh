@@ -62,7 +62,36 @@ if [ $real_addr == $local_addr ] ; then
 	
  
 
-download 
+	$systemPackage install -y epel-release
+ 	$systemPackage -y update
+	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
+	
+	rm -rf /tmp/trojan-go /etc/trojan-go
+	mkdir -p /tmp/trojan-go
+	mkdir -p /etc/trojan-go
+	cd /tmp/trojan-go
+	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.1/trojan-go-linux-amd64.zip
+	unzip trojan-go-linux-amd64
+	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
+	cp /tmp/trojan-go/geosite.dat /etc/trojan-go/
+	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
+	chmod +x /etc/trojan-go/trojan-go
+	
+	if [[ ! -f "/etc/systemd/system/trojan-go.service" ]]; then
+            if [[ ! -f "/lib/systemd/system/trojan-go.service" ]]; then
+                cp /tmp/trojan-go/example/trojan-go.service /etc/systemd/system/
+		if [ $? = 0 ]; then
+                systemctl enable trojan-go.service
+		fi
+            fi
+        fi
+	rm -rf /tmp/trojan-go
+	
+	curl -sL https://get.acme.sh | bash
+	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
+	
+	ln -s /etc/trojan-go/$your_domain.crt /root/.acme.sh/$your_domain_ecc/fullchain.cer
+	ln -s /etc/trojan-go/$your_domain.key /root/.acme.sh/$your_domain_ecc/$your_domain.key
 
 
 rm -rf /etc/trojan-go/config.json 2>/dev/null
@@ -131,41 +160,6 @@ cat > /etc/trojan-go/config.json <<-EOF
 }
 EOF
 
-download(){
-	$systemPackage install -y epel-release
- 	$systemPackage -y update
-	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
-	
-	rm -rf /tmp/trojan-go /etc/trojan-go
-	mkdir -p /tmp/trojan-go
-	mkdir -p /etc/trojan-go
-	cd /tmp/trojan-go
-	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.1/trojan-go-linux-amd64.zip
-	unzip trojan-go-linux-amd64
-	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
-	cp /tmp/trojan-go/geosite.dat /etc/trojan-go/
-	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
-	chmod +x /etc/trojan-go/trojan-go
-	
-	if [[ ! -f "/etc/systemd/system/trojan-go.service" ]]; then
-            if [[ ! -f "/lib/systemd/system/trojan-go.service" ]]; then
-                cp /tmp/trojan-go/example/trojan-go.service /etc/systemd/system/
-		chmod +x /etc/systemd/system/trojan-go.service
-		if [ $? = 0 ]; then
-                systemctl enable trojan-go.service
-		fi
-            fi
-        fi
-	rm -rf /tmp/trojan-go
-	
-	curl -sL https://get.acme.sh | bash
-	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
-	
-	ln -s /etc/trojan-go/$your_domain.crt /root/.acme.sh/$your_domain_ecc/fullchain.cer
-	ln -s /etc/trojan-go/$your_domain.key /root/.acme.sh/$your_domain_ecc/$your_domain.key
-	
-
-}
 
 
 if [ $? = 0 ]; then
