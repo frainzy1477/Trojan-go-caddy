@@ -163,7 +163,7 @@ EOF
 
 
 if [ $? = 0 ]; then
-	systemctl start trojan-go
+	/etc/trojan-go/trojan-go -config /etc/trojan-go/config.json &
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
