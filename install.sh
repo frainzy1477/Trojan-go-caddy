@@ -105,7 +105,7 @@ if [ $real_addr == $local_addr ] ; then
 	cd /etc/trojan-go
 	
 	
-cat > /etc/trojan-go/$your_domain.yml <<-EOF
+cat > /etc/trojan-go/docker-compose.yaml <<-EOF
 version: '2'
 
 services:
