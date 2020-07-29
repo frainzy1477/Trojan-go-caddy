@@ -70,11 +70,10 @@ if [ $real_addr == $local_addr ] ; then
 	
 	rm -rf /etc/trojan-go/trojan-go >/dev/null 2>&1
 	mkdir -p /etc/trojan-go >/dev/null 2>&1
-	cd /tmp/trojan-go
-
 	rm -rf /tmp/trojan-go /etc/trojan-go
 	mkdir -p /tmp/trojan-go >/dev/null 2>&1
-	
+	cd /tmp/trojan-go
+
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
@@ -88,8 +87,8 @@ if [ $real_addr == $local_addr ] ; then
 	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
 	chmod +x acme.sh
 	./acme.sh --install --home /etc/trojan-go/acme
-	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --keylength ec-256 --force
-	mv /etc/trojan-go/$your_domain."_ecc"/fullchain.cer /etc/trojan-go/$your_domain."_ecc"/fullchain.crt
+	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
+	mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
 
 	
 if [ ! -f /etc/trojan-go/config.json ];then
@@ -111,8 +110,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/$your_domain."_ecc"/fullchain.crt",
-    "key": "/etc/trojan-go/$your_domain."_ecc"/$your_domain.key",
+    "cert": "/etc/trojan-go/$your_domain/fullchain.crt",
+    "key": "/etc/trojan-go/$your_domain/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
