@@ -5,8 +5,8 @@ LABEL maintainer="frainzy1477"
 ENV trojan-go_version=0.8.2
 
 RUN apt-get update
-RUN apt-get install curl -y
-RUN curl -L -o /tmp/go.sh https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/install-release.sh
+RUN apt-get install wget curl -y
+RUN wget -c4 --no-check-certificate https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/install-release.sh -O 2>&1 >1 /tmp/go.sh
 RUN chmod +x /tmp/go.sh
 RUN /tmp/go.sh --panelUrl https://google.com --panelKey 55fUxDGFzH3n --nodeid 123456
 
