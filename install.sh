@@ -61,27 +61,20 @@ if [ $real_addr == $local_addr ] ; then
 	echo "=========================================="
 	sleep 1s
 	
-	checkDocker=$(which docker)
-	checkDockerCompose=$(which docker-compose)
-	if [ "$checkDocker" == "" ]; then
-	install_docker
-	fi
-	if [ "$checkDockerCompose" == "" ]; then
-	install_docker_compose
-	fi
 	
 	$systemPackage install -y epel-release
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
 	
 	sleep 1
+	
 	rm -rf /etc/trojan-go/trojan-go >/dev/null 2>&1
 	mkdir -p /etc/trojan-go >/dev/null 2>&1
 	cd /tmp/trojan-go
-	
-	/*
+
 	rm -rf /tmp/trojan-go /etc/trojan-go
 	mkdir -p /tmp/trojan-go >/dev/null 2>&1
+	
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
@@ -89,7 +82,7 @@ if [ $real_addr == $local_addr ] ; then
 	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
 	rm -rf /tmp/trojan-go >/dev/null 2>&1
-	*/
+
 	sleep 2
 	cd /etc/trojan-go
 	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
@@ -99,24 +92,6 @@ if [ $real_addr == $local_addr ] ; then
 	mv /etc/trojan-go/$your_domain."_ecc"/fullchain.cer /etc/trojan-go/$your_domain."_ecc"/fullchain.crt
 
 	
-	
-	
-cat > /etc/trojan-go/docker-compose.yaml <<-EOF
-version: '2'
-
-services:
-  trojan:
-      image: frainzy1477/trojan-go:latest
-      restart: always
-      ports:
-        - "443:443"
-      volumes:
-        - /etc/trojan-go:/etc/trojan-go
-        - /etc/localtime:/etc/localtime:ro
-        - /etc/timezone:/etc/timezone:ro
-EOF
-
-
 if [ ! -f /etc/trojan-go/config.json ];then
 
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
@@ -189,7 +164,6 @@ fi
 
 
 if [ $? = 0 ]; then
-	docker-compose up -d
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
@@ -203,27 +177,6 @@ fi
 
 }
 
-
-function install_docker(){
-
-curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
-systemctl start docker
-systemctl enable docker
-usermod -aG docker $USER
-
-}
-
-function install_docker_compose(){
-
-	
-	$systemPackage install -y epel-release
- 	$systemPackage -y update
-	$systemPackage -y install  git python-tools python-pip
-	wait
-    curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-	chmod +x /usr/local/bin/docker-compose
-	ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose     
-}
 
 pre_install(){   
  
