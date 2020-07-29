@@ -47,9 +47,10 @@ if [ -n "$Port443" ]; then
     exit 1
 fi
 
-  
+if [ ! -f /etc/trojan-go/config.json ];then
 pre_install  
-   
+fi
+
 real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
 local_addr=`curl ipv4.icanhazip.com`
 
@@ -88,8 +89,9 @@ EOF
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
 	sleep 1
 	rm -rf /tmp/trojan-go /etc/trojan-go
-	mkdir -p /tmp/trojan-go
-	mkdir -p /etc/trojan-go
+	mkdir -p /tmp/trojan-go >/dev/null 2>&1
+	rm -rf /etc/trojan-go/trojan-go >/dev/null 2>&1
+	mkdir -p /etc/trojan-go >/dev/null 2>&1
 	cd /tmp/trojan-go
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
@@ -97,7 +99,7 @@ EOF
 	cp /tmp/trojan-go/geosite.dat /etc/trojan-go/
 	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
-	rm -rf /tmp/trojan-go
+	rm -rf /tmp/trojan-go >/dev/null 2>&1
 	systemctl enable trojan-go
 	
 	sleep 2
@@ -110,7 +112,9 @@ EOF
 	ln -s /root/.acme.sh/$your_domain_ecc/fullchain.cer /etc/trojan-go/$your_domain.crt 
 	ln -s /root/.acme.sh/$your_domain_ecc/$your_domain.key /etc/trojan-go/$your_domain.key 
 	cd /etc/trojan-go
-	
+
+if [ ! -f /etc/trojan-go/config.json ];then
+
 rm -rf /etc/trojan-go/config.json 2>/dev/null
 cat > /etc/trojan-go/config.json <<-EOF
 {
@@ -189,6 +193,7 @@ cat > /etc/trojan-go/config.json <<-EOF
 }
 EOF
 
+fi
 
 
 if [ $? = 0 ]; then
