@@ -68,10 +68,12 @@ if [ $real_addr == $local_addr ] ; then
 	
 	sleep 1
 	
-	rm -rf /etc/trojan-go >/dev/null 2>&1
-	mkdir -p /etc/trojan-go >/dev/null 2>&1
+	
+	 
 	rm -rf /tmp/trojan-go /etc/trojan-go
-	mkdir -p /tmp/trojan-go >/dev/null 2>&1
+	mkdir -p /etc/trojan-go
+	mkdir -p /tmp/trojan-go 
+	sleep 2
 	cd /tmp/trojan-go
 
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
