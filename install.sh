@@ -93,7 +93,28 @@ if [ $real_addr == $local_addr ] ; then
 	mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
 
 	
-if [ ! -f /etc/trojan-go/config.json ];then
+touch /etc/systemd/system/trojan-go.service
+cat >/etc/systemd/system/trojan-go.service << EOF
+[Unit]
+Description=trojan
+Documentation=https://github.com/p4gefau1t/trojan-go
+After=network.target
+
+[Service]
+Type=simple
+StandardError=journal
+PIDFile=/etc/trojan/trojan.pid
+ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/*.json
+ExecReload=
+ExecStop=/etc/trojan-go/trojan-go
+LimitNOFILE=51200
+Restart=on-failure
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target  
+EOF
+systemctl daemon-reload
 
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
 cat > /etc/trojan-go/$your_domain.json <<-EOF
@@ -161,10 +182,13 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
 }
 EOF
 
-fi
+
 
 
 if [ $? = 0 ]; then
+	systemctl enable trojan-go
+        systemctl start trojan-go
+	#systemctl status trojan-go
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
