@@ -78,12 +78,16 @@ if [ $real_addr == $local_addr ] ; then
 	$systemPackage install -y epel-release
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
+	
 	sleep 1
+	
 	rm -rf /tmp/trojan-go /etc/trojan-go
 	mkdir -p /tmp/trojan-go >/dev/null 2>&1
 	rm -rf /etc/trojan-go/trojan-go >/dev/null 2>&1
 	mkdir -p /etc/trojan-go >/dev/null 2>&1
+	
 	cd /tmp/trojan-go
+	
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
@@ -91,18 +95,16 @@ if [ $real_addr == $local_addr ] ; then
 	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
 	rm -rf /tmp/trojan-go >/dev/null 2>&1
-	systemctl enable trojan-go
-	
+
 	sleep 2
 	
-	cd /root
+	wgtet https://github.com/acmesh-official/acme.sh/blob/master/acme.sh
+	chmod +x acme.sh
+	./acme.sh --install --home /etc/trojan-go/acme
+	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --keylength ec-256 --force
+	mv /etc/trojan-go/$your_domain_ecc/fullchain.cer /etc/trojan-go/$your_domain_ecc/$your_domain.crt 
+
 	
-	curl -sL https://get.acme.sh | bash
-	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
-	
-	ln -s /root/.acme.sh/$your_domain_ecc/fullchain.cer /etc/trojan-go/$your_domain.crt 
-	ln -s /root/.acme.sh/$your_domain_ecc/$your_domain.key /etc/trojan-go/$your_domain.key 
-	cd /etc/trojan-go
 	
 	
 cat > /etc/trojan-go/docker-compose.yaml <<-EOF
@@ -140,8 +142,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/$your_domain.crt",
-    "key": "/etc/trojan-go/$your_domain.key",
+    "cert": "/etc/trojan-go/$your_domain_ecc/$your_domain.crt",
+    "key": "/etc/trojan-go/$your_domain_ecc/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
