@@ -97,8 +97,8 @@ if [ $real_addr == $local_addr ] ; then
 	rm -rf /tmp/trojan-go >/dev/null 2>&1
 
 	sleep 2
-	
-	wgtet https://github.com/acmesh-official/acme.sh/blob/master/acme.sh
+	cd /etc/trojan-go
+	wgtet https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
 	chmod +x acme.sh
 	./acme.sh --install --home /etc/trojan-go/acme
 	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --keylength ec-256 --force
