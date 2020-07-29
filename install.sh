@@ -70,8 +70,12 @@ if [ $real_addr == $local_addr ] ; then
 	
 	
 	 
-	rm -rf /tmp/trojan-go /etc/trojan-go
+	rm -rf /tmp/trojan-go 
+	
+	if [ ! -d /etc/trojan-go ];then
 	mkdir -p /etc/trojan-go
+	fi
+	
 	mkdir -p /tmp/trojan-go 
 	sleep 2
 	cd /tmp/trojan-go
@@ -86,13 +90,17 @@ if [ $real_addr == $local_addr ] ; then
 
 	sleep 2
 	cd /etc/trojan-go
+	
+	if [ ! -f /etc/trojan-go/acme/acme.sh ];then
 	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
 	chmod +x acme.sh
 	./acme.sh --install --home /etc/trojan-go/acme
+	fi
+	
 	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
 	mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
 
-	
+if [ ! -f /etc/systemd/system/trojan-go.service ];then	
 touch /etc/systemd/system/trojan-go.service
 cat >/etc/systemd/system/trojan-go.service << EOF
 [Unit]
@@ -115,6 +123,7 @@ RestartSec=1s
 WantedBy=multi-user.target  
 EOF
 systemctl daemon-reload
+fi
 
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
 cat > /etc/trojan-go/$your_domain.json <<-EOF
@@ -187,7 +196,7 @@ EOF
 
 if [ $? = 0 ]; then
 	systemctl enable trojan-go
-        systemctl start trojan-go && systemctl daemon-reload
+        systemctl restart trojan-go && systemctl daemon-reload
 	#systemctl status trojan-go
 	green "======================================================================"
 	green "Trojan installation complete"
