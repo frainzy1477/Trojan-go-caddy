@@ -69,11 +69,6 @@ if [ $real_addr == $local_addr ] ; then
 	if [ "$checkDockerCompose" == "" ]; then
 	install_docker_compose
 	fi
-
-	wait
-	docker-compose down
-	wait
-	docker-compose stop	
 	
 	$systemPackage install -y epel-release
  	$systemPackage -y update
