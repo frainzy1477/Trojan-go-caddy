@@ -75,14 +75,13 @@ if [ $real_addr == $local_addr ] ; then
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
 	
 	sleep 1
-	
-	rm -rf /tmp/trojan-go /etc/trojan-go
-	mkdir -p /tmp/trojan-go >/dev/null 2>&1
 	rm -rf /etc/trojan-go/trojan-go >/dev/null 2>&1
 	mkdir -p /etc/trojan-go >/dev/null 2>&1
-	
 	cd /tmp/trojan-go
 	
+	/*
+	rm -rf /tmp/trojan-go /etc/trojan-go
+	mkdir -p /tmp/trojan-go >/dev/null 2>&1
 	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
@@ -90,7 +89,7 @@ if [ $real_addr == $local_addr ] ; then
 	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
 	rm -rf /tmp/trojan-go >/dev/null 2>&1
-
+	*/
 	sleep 2
 	cd /etc/trojan-go
 	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
