@@ -102,13 +102,15 @@ EOF
 	
 	sleep 2
 	
+	cd /root
+	
 	curl -sL https://get.acme.sh | bash
 	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
 	
-	ln -s /etc/trojan-go/$your_domain.crt /root/.acme.sh/$your_domain_ecc/fullchain.cer
-	ln -s /etc/trojan-go/$your_domain.key /root/.acme.sh/$your_domain_ecc/$your_domain.key
-
-
+	ln -s /root/.acme.sh/$your_domain_ecc/fullchain.cer /etc/trojan-go/$your_domain.crt 
+	ln -s /root/.acme.sh/$your_domain_ecc/$your_domain.key /etc/trojan-go/$your_domain.key 
+	cd /etc/trojan-go
+	
 rm -rf /etc/trojan-go/config.json 2>/dev/null
 cat > /etc/trojan-go/config.json <<-EOF
 {
