@@ -1,0 +1,57 @@
+{
+  "run_type": "server",
+  "local_addr": "0.0.0.0",
+  "local_port": 443,
+  "remote_addr": "127.0.0.1",
+  "remote_port": 80,
+  "password": [],
+  "log_level": 1,
+  "buffer_size": 32,
+  "dns": ["8.8.8.8","1.1.1.1"],
+  "disable_http_check": true,
+  "udp_timeout": 30,
+  "ssl": {
+    "verify": true,
+    "verify_hostname": true,
+    "cert": "/etc/trojan-go/x.com.crt",
+    "key": "/etc/trojan-go/x.com.key",
+    "key_password": "",
+    "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
+    "curves": "",
+    "prefer_server_cipher": false,
+    "sni": "x.com",
+    "alpn": [
+      "http/1.1"
+    ],
+    "session_ticket": true,
+    "reuse_session": true,
+    "plain_http_response": "tcp",
+    "fallback_addr": "www.cloudflare.com",
+    "fallback_port": 443,
+    "fingerprint": "firefox"
+  },
+  "tcp": {
+    "no_delay": true,
+    "keep_alive": true,
+    "prefer_ipv4": false
+  },
+  "mux": {
+    "enabled": true,
+    "concurrency": 8,
+    "idle_timeout": 60
+  },
+  "router": {
+    "enabled": false,
+    "default_policy": "proxy",
+    "domain_strategy": "as_is",
+    "geoip": "./geoip.dat",
+    "geosite": "./geosite.dat"
+  },
+  "webapi":{
+    "enabled": true, 
+    "node_id":   123456,
+    "panelUrl": "https://google.com",
+    "panelKey": "55fUxDGFzH3n",
+    "check_rate": 60
+  }
+}
