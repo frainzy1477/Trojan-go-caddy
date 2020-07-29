@@ -23,12 +23,12 @@ function install_trojan(){
 	systemPackage="apt-get"
 	fi
 	
-systemctl stop firewalld >/dev/null 2>&1
-systemctl mask firewalld >/dev/null 2>&1
+	systemctl stop firewalld >/dev/null 2>&1
+	systemctl mask firewalld >/dev/null 2>&1
 
-yum install iptables-services -y >/dev/null 2>&1
-chkconfig iptables on >/dev/null 2>&1
-systemctl start iptables >/dev/null 2>&1
+	yum install iptables-services -y >/dev/null 2>&1
+	chkconfig iptables on >/dev/null 2>&1
+	systemctl start iptables >/dev/null 2>&1
 
 Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
 Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
@@ -47,9 +47,9 @@ if [ -n "$Port443" ]; then
     exit 1
 fi
 
-if [ ! -f /etc/trojan-go/config.json ];then
+
 pre_install  
-fi
+
 
 real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
 local_addr=`curl ipv4.icanhazip.com`
@@ -61,29 +61,20 @@ if [ $real_addr == $local_addr ] ; then
 	echo "=========================================="
 	sleep 1s
 	
-touch /etc/systemd/system/trojan-go.service
-cat >/etc/systemd/system/trojan-go.service << EOF
-[Unit]
-Description=trojan
-Documentation=https://github.com/p4gefau1t/trojan-go
-After=network.target
+	checkDocker=$(which docker)
+	checkDockerCompose=$(which docker-compose)
+	if [ "$checkDocker" == "" ]; then
+	install_docker
+	fi
+	if [ "$checkDockerCompose" == "" ]; then
+	install_docker_compose
+	fi
 
-[Service]
-Type=simple
-StandardError=journal
-PIDFile=/etc/trojan/trojan.pid
-ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan/config.json
-ExecReload=
-ExecStop=/etc/trojan-go/trojan-go
-LimitNOFILE=51200
-Restart=on-failure
-RestartSec=1s
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-
+	wait
+	docker-compose down
+	wait
+	docker-compose stop	
+	
 	$systemPackage install -y epel-release
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
@@ -112,11 +103,28 @@ EOF
 	ln -s /root/.acme.sh/$your_domain_ecc/fullchain.cer /etc/trojan-go/$your_domain.crt 
 	ln -s /root/.acme.sh/$your_domain_ecc/$your_domain.key /etc/trojan-go/$your_domain.key 
 	cd /etc/trojan-go
+	
+	
+cat > /etc/trojan-go/$your_domain.yml <<-EOF
+version: '2'
+
+services:
+  trojan:
+      image: frainzy1477/trojan-go:latest
+      restart: always
+      ports:
+        - "443:443"
+      volumes:
+        - /etc/trojan-go:/etc/trojan-go
+        - /etc/localtime:/etc/localtime:ro
+        - /etc/timezone:/etc/timezone:ro
+EOF
+
 
 if [ ! -f /etc/trojan-go/config.json ];then
 
-rm -rf /etc/trojan-go/config.json 2>/dev/null
-cat > /etc/trojan-go/config.json <<-EOF
+rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
+cat > /etc/trojan-go/$your_domain.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
@@ -177,19 +185,7 @@ cat > /etc/trojan-go/config.json <<-EOF
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
     "check_rate": $check_rate
-  },
-  "api": {
-    "enabled": true,
-    "api_addr": "127.0.0.1",
-    "api_port": 9000,
-    "ssl": {
-      "enabled": false,
-      "key": "",
-      "cert": "",
-      "verify_client": false,
-      "client_cert": []
-    }
-  }  
+  } 
 }
 EOF
 
@@ -197,7 +193,7 @@ fi
 
 
 if [ $? = 0 ]; then
-	/etc/trojan-go/trojan-go -config /etc/trojan-go/config.json &
+	docker-compose up -d
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
@@ -212,7 +208,26 @@ fi
 }
 
 
+function install_docker(){
 
+curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
+systemctl start docker
+systemctl enable docker
+usermod -aG docker $USER
+
+}
+
+function install_docker_compose(){
+
+	
+	$systemPackage install -y epel-release
+ 	$systemPackage -y update
+	$systemPackage -y install  git python-tools python-pip
+	wait
+    curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+	chmod +x /usr/local/bin/docker-compose
+	ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose     
+}
 
 pre_install(){   
  
