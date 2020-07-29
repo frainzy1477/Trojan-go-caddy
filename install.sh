@@ -96,7 +96,7 @@ if [ $real_addr == $local_addr ] ; then
 	chmod +x acme.sh
 	./acme.sh --install --home /etc/trojan-go/acme
 	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --keylength ec-256 --force
-	
+	mv /etc/trojan-go/$your_domain."_ecc"/fullchain.cer /etc/trojan-go/$your_domain."_ecc"/fullchain.crt
 
 	
 	
@@ -136,8 +136,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/$your_domain_ecc/fullchain.cer",
-    "key": "/etc/trojan-go/$your_domain_ecc/$your_domain.key",
+    "cert": "/etc/trojan-go/$your_domain."_ecc"/fullchain.crt",
+    "key": "/etc/trojan-go/$your_domain."_ecc"/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
