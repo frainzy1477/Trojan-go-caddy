@@ -68,7 +68,7 @@ if [ $real_addr == $local_addr ] ; then
 	
 	sleep 1
 	
-	rm -rf /etc/trojan-go/trojan-go >/dev/null 2>&1
+	rm -rf /etc/trojan-go >/dev/null 2>&1
 	mkdir -p /etc/trojan-go >/dev/null 2>&1
 	rm -rf /tmp/trojan-go /etc/trojan-go
 	mkdir -p /tmp/trojan-go >/dev/null 2>&1
