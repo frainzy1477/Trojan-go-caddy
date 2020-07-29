@@ -50,26 +50,12 @@ fi
 
 pre_install  
 
-
-real_addr=`ping ${your_domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'`
-local_addr=`curl ipv4.icanhazip.com`
-
-
-if [ $real_addr == $local_addr ] ; then
-	echo "=========================================="
-	green "Domain name resolution is normal, start installation trojan"
-	echo "=========================================="
-	sleep 1s
-	
-	
 	$systemPackage install -y epel-release
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
 	
 	sleep 1
 	
-	
-	 
 	rm -rf /tmp/trojan-go 
 	
 	if [ ! -d /etc/trojan-go ];then
@@ -202,12 +188,7 @@ if [ $? = 0 ]; then
 	green "Trojan installation complete"
 	echo "======================================================================"
 fi	
-else
-	echo "================================"
-	red "The domain name resolution address is inconsistent with this VPS IP address"
-	red "This installation failed, please make sure the domain name resolution is normal"
-	echo "================================"
-fi
+
 
 }
 
