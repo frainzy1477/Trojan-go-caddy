@@ -60,32 +60,47 @@ if [ $real_addr == $local_addr ] ; then
 	echo "=========================================="
 	sleep 1s
 	
- 
+touch /etc/systemd/system/trojan-go.service
+cat >/etc/systemd/system/trojan-go.service << EOF
+[Unit]
+Description=trojan
+Documentation=https://github.com/p4gefau1t/trojan-go
+After=network.target
+
+[Service]
+Type=simple
+StandardError=journal
+PIDFile=/etc/trojan/trojan.pid
+ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan/config.json
+ExecReload=
+ExecStop=/etc/trojan-go/trojan-go
+LimitNOFILE=51200
+Restart=on-failure
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 
 	$systemPackage install -y epel-release
  	$systemPackage -y update
 	$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
-	
+	sleep 1
 	rm -rf /tmp/trojan-go /etc/trojan-go
 	mkdir -p /tmp/trojan-go
 	mkdir -p /etc/trojan-go
 	cd /tmp/trojan-go
-	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.1/trojan-go-linux-amd64.zip
+	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
 	cp /tmp/trojan-go/geosite.dat /etc/trojan-go/
 	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
-	
-	if [[ ! -f "/etc/systemd/system/trojan-go.service" ]]; then
-            if [[ ! -f "/lib/systemd/system/trojan-go.service" ]]; then
-                cp /tmp/trojan-go/example/trojan-go.service /etc/systemd/system/
-		if [ $? = 0 ]; then
-                systemctl enable trojan-go.service
-		fi
-            fi
-        fi
 	rm -rf /tmp/trojan-go
+	systemctl enable trojan-go
+	
+	sleep 2
 	
 	curl -sL https://get.acme.sh | bash
 	bash /root/.acme.sh/acme.sh --issue -d $your_domain  --debug --standalone --keylength ec-256
@@ -156,7 +171,19 @@ cat > /etc/trojan-go/config.json <<-EOF
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
     "check_rate": $check_rate
-  }
+  },
+  "api": {
+    "enabled": true,
+    "api_addr": "127.0.0.1",
+    "api_port": 9000,
+    "ssl": {
+      "enabled": false,
+      "key": "",
+      "cert": "",
+      "verify_client": false,
+      "client_cert": []
+    }
+  }  
 }
 EOF
 
