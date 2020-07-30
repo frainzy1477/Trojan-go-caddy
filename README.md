@@ -1,3 +1,4 @@
+STANDARD INSTALL
 ```
 cd /home && \
 rm -rf install.sh && \
@@ -5,9 +6,7 @@ wget  https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/ins
 chmod +x  install.sh && \
 bash install.sh
 
-```
 
-```
 systemctl enable trojan-go
 systemctl start trojan-go
 systemctl restart trojan-go
