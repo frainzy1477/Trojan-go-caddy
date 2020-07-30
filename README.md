@@ -37,8 +37,12 @@ ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
  RUN TROJAN-GO-SSPANEL IN DOCKER
  ```
  docker run -d --name=trojan \
--e NODEID=1 -e DOMAIN=https://www.abc.net -e MUKEY=123456 \
--e HOST=abc.com -e SERVER_PORT=443 -e CHECKRATE=60 \
+-e NODEID=1 \
+-e WEBAPI_URL=https://www.abc.net \
+-e WEBAPI_KEY=123456 \
+-e SNI_HOST=abc.com \
+-e TROJAN_PORT=443 \
+-e CHECKRATE=60 \
 --network=host --log-opt max-size=50m --log-opt max-file=5 --restart=always \
 frainzy1477/plugin:webapi
 
