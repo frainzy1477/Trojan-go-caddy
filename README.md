@@ -23,16 +23,6 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
 ```
-
-
-INSTALL DOCKER-COMPOSE
-```
-yum -y install  git python-tools python-pip curl
-sudo curl -L https://github.com/docker/compose/releases/download/1.25.4/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose 
-  
- ```
  
  RUN TROJAN-GO-SSPANEL IN DOCKER
  ```
