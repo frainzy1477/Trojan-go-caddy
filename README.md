@@ -17,7 +17,7 @@ systemctl status trojan-go
 
 INSTALL DOCKER
 ```
-yum -y install  git python-tools python-pip curl
+yum -y install curl
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
