@@ -31,7 +31,6 @@ sudo sh get-docker.sh
 -e WEBAPI_KEY=123456 \
 -e SNI_HOST=abc.com \
 -e TROJAN_PORT=443 \
--e CHECKRATE=60 \
 --network=host --log-opt max-size=50m \
 --log-opt max-file=5 --restart=always \
 frainzy1477/plugin:webapi
