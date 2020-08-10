@@ -23,7 +23,7 @@ sudo sh get-docker.sh
 
 ```
  
- RUN TROJAN-GO-SSPANEL IN DOCKER
+ RUN TROJAN-GO SSPANEL-WEBAPI IN DOCKER
  ```
  docker run -d --name=trojan \
 -e NODEID=1 \
