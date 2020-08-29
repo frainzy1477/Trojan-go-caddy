@@ -78,7 +78,19 @@ cd /etc/trojan-go
 wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 
-
+	cd /etc/trojan-go
+	
+	if [ ! -f /etc/trojan-go/acme/acme.sh ];then
+	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
+	chmod +x acme.sh
+	./acme.sh --install --home /etc/trojan-go/acme
+	fi
+	
+	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
+	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
+	#mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
+	
+	
 if [ "$enable_websocket" == "true" ];then
 
 wget https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/Caddyfile
@@ -91,10 +103,9 @@ services:
     image: frainzy1477/caddyy
     restart: always
     environment:
-      - ACME_AGREE=true
+      - ACME_AGREE=false
       - TROJAN_DOMAIN=$your_domain
-      - TROJAN_PATH=/trojan
-      - TROJAN_EMAIL=allsafe@my.com
+      - TROJAN_PATH=/
       - TROJAN_PORT=$trojan_port
       - TROJAN_OUTSIDE_PORT=80
     network_mode: "host"
@@ -149,8 +160,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/$your_domain.crt",
-    "key": "/etc/trojan-go/$your_domain.key",
+    "cert": "/etc/trojan-go/fullchain.crt",
+    "key": "/etc/trojan-go/privkey.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
