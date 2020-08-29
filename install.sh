@@ -77,8 +77,12 @@ rm -rf /tmp/trojan-go >/dev/null 2>&1
 cd /etc/trojan-go
 wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
-	
+
+
 if [ "$enable_websocket" == "true" ];then
+
+wget https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/Caddyfile
+
 cat > /etc/trojan-go/docker-compose.yml <<-EOF
 version: '2'
 
@@ -99,25 +103,6 @@ services:
       - ./Caddyfile:/etc/Caddyfile
 EOF
 
-cat > /etc/trojan-go/Caddyfile <<-EOF
-{$TROJAN_DOMAIN}:{$TROJAN_OUTSIDE_PORT}
-{
-  root /srv/www
-  log ./caddy.log
-  proxy {$TROJAN_PATH} 127.0.0.1:{$TROJAN_PORT} {
-    websocket
-    header_upstream -Origin
-  }
-  gzip
-  tls {$TROJAN_EMAIL} {
-    protocols tls1.2 
-	#tls1.3
-    # remove comment if u want to use cloudflare (for DNS challenge authentication)
-    # dns cloudflare
-  }
-  #realip cloudflare
-}
-EOF
 fi
 
 if [ ! -f /etc/systemd/system/trojan-go-"${your_domain}".service ];then	
