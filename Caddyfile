@@ -15,3 +15,13 @@
   }
   #realip cloudflare
 }
+{$TROJAN_DOMAIN}:80
+{
+  root /srv/www
+  log ./caddy.log
+  proxy {$TROJAN_PATH} 127.0.0.1:{$TROJAN_PORT} {
+    websocket
+    header_upstream -Origin
+  }
+  gzip
+}
