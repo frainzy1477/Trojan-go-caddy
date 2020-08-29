@@ -63,29 +63,20 @@ pre_install
 	fi
 	
 	mkdir -p /tmp/trojan-go 
-	sleep 2
+	sleep 1
 	cd /tmp/trojan-go
 
-	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2/trojan-go-linux-amd64.zip
+	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
-	cp /tmp/trojan-go/geosite.dat /etc/trojan-go/
-	cp /tmp/trojan-go/geoip.dat /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
 	rm -rf /tmp/trojan-go >/dev/null 2>&1
-
-	sleep 2
+	
 	cd /etc/trojan-go
+	wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
+	wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 	
-	if [ ! -f /etc/trojan-go/acme/acme.sh ];then
-	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
-	chmod +x acme.sh
-	./acme.sh --install --home /etc/trojan-go/acme
-	fi
 	
-	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
-	mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
-
 if [ ! -f /etc/systemd/system/trojan-go.service ];then	
 touch /etc/systemd/system/trojan-go.service
 cat >/etc/systemd/system/trojan-go.service << EOF
@@ -116,7 +107,7 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
 {
   "run_type": "server",
   "local_addr": "0.0.0.0",
-  "local_port": 443,
+  "local_port": $trojan_port,
   "remote_addr": "127.0.0.1",
   "remote_port": 80,
   "password": [],
@@ -124,12 +115,12 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "buffer_size": 32,
   "dns": ["8.8.8.8","1.1.1.1"],
   "disable_http_check": true,
-  "udp_timeout": 30,
+  "udp_timeout": 60,
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/$your_domain/fullchain.crt",
-    "key": "/etc/trojan-go/$your_domain/$your_domain.key",
+    "cert": "/etc/trojan-go/fullchain.crt",
+    "key": "/etc/trojan-go/privkey.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -138,8 +129,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "alpn": [
       "http/1.1"
     ],
-    "session_ticket": true,
-    "reuse_session": true,
+    "session_ticket": false,
+    "reuse_session": false,
     "plain_http_response": "tcp",
     "fallback_addr": "www.cloudflare.com",
     "fallback_port": 443,
@@ -148,12 +139,32 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "tcp": {
     "no_delay": true,
     "keep_alive": true,
-    "prefer_ipv4": false
+    "prefer_ipv4": true
   },
   "mux": {
     "enabled": $enable_mux,
     "concurrency": 8,
     "idle_timeout": 60
+  },
+  "shadowsocks": {
+    "enabled": $enable_ss,
+    "method": "$ss_method",
+    "password": "$ss_password"
+  },
+  "transport_plugin": {
+    "enabled": $enable_tp,
+    "type": "$plugin_type",
+    "command": "$plugin_command",
+    "option": "$plugin_option",
+    "arg": [$plugin_arg],
+    "env": []
+  },
+  "forward_proxy": {
+    "enabled": $forward_proxy,
+    "proxy_addr": "$proxy_addr",
+    "proxy_port": $proxy_port,
+    "username": "$username",
+    "password": "$password"
   },
   "router": {
     "enabled": true,
@@ -200,6 +211,17 @@ pre_install(){
     echo
     echo "---------------------------"
     echo "Domain Name = $your_domain"
+    echo "---------------------------"
+    echo
+    
+    green "Trojan-GO Port"
+    read -p "(Default : 443):" trojan_port
+    if [ -z "$trojan_port" ];then 
+	trojan_port="443"
+	fi
+    echo
+    echo "---------------------------"
+    echo "Trojan-GO Port = $trojan_port"
     echo "---------------------------"
     echo
     
@@ -250,6 +272,158 @@ pre_install(){
     echo     
     fi
     
+      green "Enable Shadowsocks"
+    read -p "(Default : false 'true/false'):" enable_ss
+    if [ -z "$enable_ss" ];then
+	enable_ss="false"
+	fi
+    echo
+    echo "---------------------------"
+    echo "Enable Shadowsocks = $enable_ss"
+    echo "---------------------------"
+    echo  
+    
+    if [ "$enable_ss" == "true" ];then
+		green "Shadowsocks Method"
+		read -p "(Default : AES-128-GCM 'CHACHA20-IETF-POLY1305 / AES-128-GCM / AES-256-GCM'):" ss_method
+		if [ -z "$ss_method" ];then
+		ss_method="AES-128-GCM"
+		fi
+		echo
+		echo "---------------------------"
+		echo "Shadowsocks Method = $ss_method"
+		echo "---------------------------"
+		echo 
+		
+		
+		green "Shadowsocks Password"
+		read -p "(Default Password: zCR&3n*E7dut#1^tu$ ):" ss_password
+		if [ -z "$ss_password" ];then
+		ss_password="zCR&3n*E7dut#1^tu$"
+		fi
+		echo
+		echo "---------------------------"
+		echo "Shadowsocks Password = $ss_password"
+		echo "---------------------------"
+		echo 
+		
+		green "Enable Transport Plugin"
+		read -p "(Default : false 'false/true'):" enable_tp
+		if [ -z "$enable_tp" ];then
+		enable_tp="false"
+		fi
+		echo
+		echo "---------------------------"
+		echo "Enable Transport Plugin = $enable_tp"
+		echo "---------------------------"
+		echo 
+		
+		if [ "$enable_tp" == "true" ];then
+		
+			green "Plugin Type"
+			read -p "(Default : plaintext 'shadowsocks / plaintext / other' ):" plugin_type
+			if [ -z "$plugin_type" ];then
+			plugin_type="plaintext"
+			fi
+			echo
+			echo "---------------------------"
+			echo "Plugin Option = $plugin_type"
+			echo "---------------------------"
+			echo 
+			
+			
+			if [ "$plugin_type" == "shadowsocks" ];then
+			
+				green "Plugin Command"
+				read -p "(Default : ./v2ray-plugin ):" plugin_command
+				if [ -z "$plugin_command" ];then 
+				plugin_command="./v2ray-plugin"
+				fi
+				echo
+				echo "---------------------------"
+				echo "Plugin Command = $plugin_command"
+				echo "---------------------------"
+				echo	
+				
+				green "Plugin Argument"
+				read -p "(Default : "-server", "-host", "www.baidu.com" ):" plugin_arg
+				if [ -z "$plugin_command" ];then 
+				plugin_arg='"-server", "-host", "www.baidu.com"'
+				fi
+				echo
+				echo "---------------------------"
+				echo "Plugin Argument = $plugin_arg"
+				echo "---------------------------"
+				echo
+				
+				green "Plugin Option"
+				read -p "(Default :  ):" plugin_option
+				#read -p "(Default : obfs=http;obfs-host=www.baidu.com ):" plugin_option
+				#if [ -z "$plugin_option" ];then 
+				#plugin_option="obfs=http;obfs-host=www.baidu.com"
+				#fi
+				echo
+				echo "---------------------------"
+				echo "Plugin Option = $plugin_option"
+				echo "---------------------------"
+				echo
+				
+			
+			
+			fi
+		fi
+    fi
+    
+    green "Enable Forward Proxy (socks5)"
+    read -p "(Default : false  'false/true'):" forward_proxy
+    if [ -z "$forward_proxy" ];then
+	forward_proxy="false"
+	fi
+    echo
+    echo "---------------------------"
+    echo "Enable Forward Proxy(socks5) = $forward_proxy"
+    echo "---------------------------"
+    echo 
+    
+    if [ "$forward_proxy" == "true" ];then
+		green "Proxy Address"
+		read -p "(Default : ${your_domain} ):" proxy_addr
+		if [ -z "$proxy_addr" ];then
+		proxy_addr="$your_domain"
+		fi
+		echo
+		echo "---------------------------"
+		echo "Proxy Address = $proxy_addr"
+		echo "---------------------------"
+		echo 
+		
+		green "Proxy Port"
+		read -p "(Default : 1080 ):" proxy_port
+		if [ -z "$proxy_port" ];then
+		proxy_port="1080"
+		fi
+		echo
+		echo "---------------------------"
+		echo "Proxy Port = $proxy_port"
+		echo "---------------------------"
+		echo 
+		
+		green "Username"
+		read -p "(Default :  ):" username
+		echo
+		echo "---------------------------"
+		echo "Username = $username"
+		echo "---------------------------"
+		echo 
+		
+		green "Password"
+		read -p "(Default :  ):" password
+		echo
+		echo "---------------------------"
+		echo "Password = $password"
+		echo "---------------------------"
+		echo 
+    fi  
     green "PanelUrl"
     read -p "(Default : No default value):" panelurl
     echo
@@ -288,6 +462,7 @@ pre_install(){
     echo "Check Rate = $check_rate"
     echo "---------------------------"
     echo 
+    
 }   
 
 start_menu(){
