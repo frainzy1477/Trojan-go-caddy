@@ -96,7 +96,7 @@ services:
       - TROJAN_PATH=/trojan
       - TROJAN_EMAIL=allsafe@my.com
       - TROJAN_PORT=$trojan_port
-      - TROJAN_OUTSIDE_PORT=443
+      - TROJAN_OUTSIDE_PORT=80
     network_mode: "host"
     volumes:
       - ./.caddy:/root/.caddy
