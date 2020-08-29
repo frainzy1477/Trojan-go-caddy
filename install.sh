@@ -202,7 +202,7 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "forward_proxy": {
     "enabled": $forward_proxy,
     "proxy_addr": "$proxy_addr",
-    "proxy_port": $proxy_port,
+    "proxy_port": 1080,
     "username": "$username",
     "password": "$password"
   },
@@ -236,6 +236,7 @@ if [ $? = 0 ]; then
 	systemctl enable trojan-go-$your_domain
         systemctl restart trojan-go-$your_domain
 	systemctl status trojan-go-$your_domain
+	systemctl daemon-reload
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
