@@ -286,9 +286,9 @@ pre_install(){
 		
 		
 		green "Shadowsocks Password"
-		read -p "(Default Password: zCR&3n*E7dut#1^tu$ ):" ss_password
+		read -p "(Default Password: zCR&3n*E7du ):" ss_password
 		if [ -z "$ss_password" ];then
-		ss_password="zCR&3n*E7dut#1^tu$"
+		ss_password="zCR&3n*E7du"
 		fi
 		echo
 		echo "---------------------------"
