@@ -130,6 +130,7 @@ EOF
 systemctl daemon-reload
 fi
 
+  
 
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
 cat > /etc/trojan-go/$your_domain.json <<-EOF
@@ -148,8 +149,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "./.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.crt",
-    "key": "./.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.key",
+    "cert": "/etc/trojan-go/$your_domain.crt",
+    "key": "/etc/trojan-go/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -207,11 +208,6 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "path": "$websocket_path",
     "hostname": "$websocket_host"
   },
-  "api": {
-    "enabled": true,
-    "api_addr": "127.0.0.1",
-    "api_port": 8000
-  },
   "webapi":{
     "enabled": true, 
     "node_id":   $node_id,
@@ -230,11 +226,13 @@ if [ $? = 0 ]; then
 	#systemctl status trojan-go
 	if [ "$enable_websocket" == "true" ];then
 	docker-compose up -d
+	ln -s /etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.crt /etc/trojan-go/$your_domain.crt  
+	ln -s /etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.key /etc/trojan-go/$your_domain.key
 	sleep 5
 	fi
-	systemctl enable trojan-go
-        systemctl restart trojan-go
-	systemctl status trojan-go
+	systemctl enable trojan-go-$your_domain
+        systemctl restart trojan-go-$your_domain
+	systemctl status trojan-go-$your_domain
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
@@ -349,9 +347,9 @@ pre_install(){
 		
 		
 	green "Shadowsocks Password"
-	read -p "(Default Password: zCR&3n*E7du ):" ss_password
+	read -p "(Default Password: zCR3nE7du ):" ss_password
 	if [ -z "$ss_password" ];then
-	ss_password="zCR&3n*E7du"
+	ss_password="zCR3nE7du"
 	fi
 	echo
 	echo "---------------------------"
