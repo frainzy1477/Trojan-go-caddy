@@ -1,0 +1,17 @@
+{$TROJAN_DOMAIN}:{$TROJAN_OUTSIDE_PORT}
+{
+  root /srv/www
+  log ./caddy.log
+  proxy {$TROJAN_PATH} 127.0.0.1:{$TROJAN_PORT} {
+    websocket
+    header_upstream -Origin
+  }
+  gzip
+  tls {$TROJAN_EMAIL} {
+    protocols tls1.2 
+	#tls1.3
+    # remove comment if u want to use cloudflare (for DNS challenge authentication)
+    # dns cloudflare
+  }
+  #realip cloudflare
+}
