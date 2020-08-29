@@ -78,18 +78,17 @@ cd /etc/trojan-go
 wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 
-	cd /etc/trojan-go
+cd /etc/trojan-go
 	
-	if [ ! -f /etc/trojan-go/acme/acme.sh ];then
-	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
-	chmod +x acme.sh
-	./acme.sh --install --home /etc/trojan-go/acme
-	fi
+if [ ! -f /etc/trojan-go/acme/acme.sh ];then
+wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
+chmod +x acme.sh
+./acme.sh --install --home /etc/trojan-go/acme
+fi
 	
-	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
-	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
-	#mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
-	
+bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
+bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
+#mv /etc/trojan-go/$your_domain/fullchain.cer /etc/trojan-go/$your_domain/fullchain.crt
 	
 if [ "$enable_websocket" == "true" ];then
 
@@ -105,7 +104,7 @@ services:
     environment:
       - ACME_AGREE=false
       - TROJAN_DOMAIN=$your_domain
-      - TROJAN_PATH=/
+      - TROJAN_PATH=$websocket_path
       - TROJAN_PORT=$trojan_port
       - TROJAN_OUTSIDE_PORT=80
     network_mode: "host"
@@ -229,16 +228,9 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
 }
 EOF
 
-
-
 if [ $? = 0 ]; then
-	#systemctl enable trojan-go
-        #systemctl restart trojan-go && systemctl daemon-reload
-	#systemctl status trojan-go
 	if [ "$enable_websocket" == "true" ];then
 	docker-compose up -d
-	ln -s /etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.crt /etc/trojan-go/$your_domain.crt  
-	ln -s /etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.key /etc/trojan-go/$your_domain.key
 	sleep 5
 	fi
 	systemctl enable trojan-go-$your_domain
