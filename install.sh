@@ -119,6 +119,32 @@ cat > /etc/trojan-go/Caddyfile <<-EOF
 }
 EOF
 
+if [ ! -f /etc/systemd/system/trojan-go-$your_domain.service ];then	
+touch /etc/systemd/system/trojan-go-$your_domain.service
+cat >/etc/systemd/system/trojan-go-$your_domain.service << EOF
+[Unit]
+Description=trojan
+Documentation=https://github.com/p4gefau1t/trojan-go
+After=network.target
+
+[Service]
+Type=simple
+StandardError=journal
+PIDFile=/etc/trojan-go/trojan-go.pid
+ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/$your_domain.json
+ExecReload=
+ExecStop=/etc/trojan-go/trojan-go
+LimitNOFILE=51200
+Restart=on-failure
+RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target  
+EOF
+systemctl daemon-reload
+fi
+
+
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
 cat > /etc/trojan-go/$your_domain.json <<-EOF
 {
@@ -213,7 +239,9 @@ if [ $? = 0 ]; then
 	#systemctl status trojan-go
 	docker-compose up -d
 	sleep 5
-	
+	systemctl enable trojan-go
+        systemctl restart trojan-go
+	systemctl status trojan-go
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
