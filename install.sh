@@ -12,23 +12,17 @@ red(){
 
 function install_trojan(){
 
-    green "Enter system type By number [1]centos [2]debian/ubuntu "
-    read -p "(Default : 1   ):" system_type
-    if [ -z "$systemPackage" ];then
-	system_type="1"
-	fi
-	if [ "$system_type" == "1" ];then
-	systemPackage="yum"
-	elif [ "$system_type" == "2" ];then
-	systemPackage="apt-get"
-	fi
+green "Enter system type By number [1]centos [2]debian/ubuntu "
+read -p "(Default : 1   ):" system_type
+if [ -z "$systemPackage" ];then
+system_type="1"
+fi
+if [ "$system_type" == "1" ];then
+systemPackage="yum"
+elif [ "$system_type" == "2" ];then
+systemPackage="apt-get"
+fi
 	
-	systemctl stop firewalld >/dev/null 2>&1
-	systemctl mask firewalld >/dev/null 2>&1
-
-	yum install iptables-services -y >/dev/null 2>&1
-	chkconfig iptables on >/dev/null 2>&1
-	systemctl start iptables >/dev/null 2>&1
 
 Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
 Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
@@ -65,53 +59,26 @@ if [ "$checkDockerCompose" == "" ]; then
 install_docker_compose
 fi	
 
-	sleep 1
+rm -rf /tmp/trojan-go 
 	
-	rm -rf /tmp/trojan-go 
-	
-	if [ ! -d /etc/trojan-go ];then
-	mkdir -p /etc/trojan-go
-	fi
-	
-	mkdir -p /tmp/trojan-go 
-	sleep 1
-	cd /tmp/trojan-go
-
-	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
-	unzip trojan-go-linux-amd64
-	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
-	chmod +x /etc/trojan-go/trojan-go
-	rm -rf /tmp/trojan-go >/dev/null 2>&1
-	
-	cd /etc/trojan-go
-	wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
-	wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
-	
-	
-if [ ! -f /etc/systemd/system/trojan-go.service ];then	
-touch /etc/systemd/system/trojan-go.service
-cat >/etc/systemd/system/trojan-go.service << EOF
-[Unit]
-Description=trojan
-Documentation=https://github.com/p4gefau1t/trojan-go
-After=network.target
-
-[Service]
-Type=simple
-StandardError=journal
-PIDFile=/etc/trojan/trojan.pid
-ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/$your_domain.json
-ExecReload=
-ExecStop=/etc/trojan-go/trojan-go
-LimitNOFILE=51200
-Restart=on-failure
-RestartSec=1s
-
-[Install]
-WantedBy=multi-user.target  
-EOF
-systemctl daemon-reload
+if [ ! -d /etc/trojan-go ];then
+mkdir -p /etc/trojan-go
 fi
+	
+mkdir -p /tmp/trojan-go 
+sleep 1
+cd /tmp/trojan-go
+
+wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
+unzip trojan-go-linux-amd64
+cp /tmp/trojan-go/trojan-go /etc/trojan-go/
+chmod +x /etc/trojan-go/trojan-go
+rm -rf /tmp/trojan-go >/dev/null 2>&1
+	
+cd /etc/trojan-go
+wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
+wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
+	
 
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
 cat > /etc/trojan-go/$your_domain.json <<-EOF
@@ -198,7 +165,6 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   } 
 }
 EOF
-
 
 
 
@@ -307,8 +273,8 @@ pre_install(){
     echo  
     
     if [ "$enable_ss" == "true" ];then
-		green "Shadowsocks Method"
-		read -p "(Default : AES-128-GCM 'CHACHA20-IETF-POLY1305 / AES-128-GCM / AES-256-GCM'):" ss_method
+    green "Shadowsocks Method"
+    read -p "(Default : AES-128-GCM 'CHACHA20-IETF-POLY1305 / AES-128-GCM / AES-256-GCM'):" ss_method
 		if [ -z "$ss_method" ];then
 		ss_method="AES-128-GCM"
 		fi
@@ -368,33 +334,30 @@ pre_install(){
 				echo "---------------------------"
 				echo	
 				
-				green "Plugin Argument"
-				read -p "(Default : "-server", "-host", "www.baidu.com" ):" plugin_arg
-				if [ -z "$plugin_command" ];then 
-				plugin_arg='"-server", "-host", "www.baidu.com"'
-				fi
-				echo
-				echo "---------------------------"
-				echo "Plugin Argument = $plugin_arg"
-				echo "---------------------------"
-				echo
-				
-				green "Plugin Option"
-				read -p "(Default :  ):" plugin_option
-				#read -p "(Default : obfs=http;obfs-host=www.baidu.com ):" plugin_option
-				#if [ -z "$plugin_option" ];then 
-				#plugin_option="obfs=http;obfs-host=www.baidu.com"
-				#fi
-				echo
-				echo "---------------------------"
-				echo "Plugin Option = $plugin_option"
-				echo "---------------------------"
-				echo
-				
-			
-			
-			fi
-		fi
+    green "Plugin Argument"
+    read -p "(Default : "-server", "-host", "www.baidu.com" ):" plugin_arg
+    if [ -z "$plugin_command" ];then 
+    plugin_arg='"-server", "-host", "www.baidu.com"'
+    fi
+    echo
+    echo "---------------------------"
+    echo "Plugin Argument = $plugin_arg"
+    echo "---------------------------"
+    echo	
+    green "Plugin Option"
+    read -p "(Default :  ):" plugin_option
+    #read -p "(Default : obfs=http;obfs-host=www.baidu.com ):" plugin_option
+    #if [ -z "$plugin_option" ];then 
+    #plugin_option="obfs=http;obfs-host=www.baidu.com"
+    #fi
+    echo
+    echo "---------------------------"
+    echo "Plugin Option = $plugin_option"
+    echo "---------------------------"
+    echo
+	
+    fi
+    fi
     fi
     
     green "Enable Forward Proxy (socks5)"
