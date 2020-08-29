@@ -62,14 +62,13 @@ fi
 rm -rf /tmp/trojan-go 
 	
 if [ ! -d /etc/trojan-go ];then
-mkdir -p /etc/trojan-go
+	mkdir -p /etc/trojan-go
 fi
 	
 mkdir -p /tmp/trojan-go 
-sleep 1
 cd /tmp/trojan-go
 
-https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
+wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
 unzip trojan-go-linux-amd64
 cp /tmp/trojan-go/trojan-go /etc/trojan-go/
 chmod +x /etc/trojan-go/trojan-go
@@ -170,7 +169,7 @@ EOF
 
 if [ $? = 0 ]; then
 	#systemctl enable trojan-go
-        #systemctl restart trojan-go && systemctl daemon-reload
+    #systemctl restart trojan-go && systemctl daemon-reload
 	#systemctl status trojan-go
 	green "======================================================================"
 	green "Trojan installation complete"
@@ -261,7 +260,7 @@ pre_install(){
     echo     
     fi
     
-      green "Enable Shadowsocks"
+    green "Enable Shadowsocks"
     read -p "(Default : false 'true/false'):" enable_ss
     if [ -z "$enable_ss" ];then
 	enable_ss="false"
@@ -275,64 +274,64 @@ pre_install(){
     if [ "$enable_ss" == "true" ];then
     green "Shadowsocks Method"
     read -p "(Default : AES-128-GCM 'CHACHA20-IETF-POLY1305 / AES-128-GCM / AES-256-GCM'):" ss_method
-		if [ -z "$ss_method" ];then
-		ss_method="AES-128-GCM"
-		fi
-		echo
-		echo "---------------------------"
-		echo "Shadowsocks Method = $ss_method"
-		echo "---------------------------"
-		echo 
+	if [ -z "$ss_method" ];then
+	ss_method="AES-128-GCM"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Shadowsocks Method = $ss_method"
+	echo "---------------------------"
+	echo 
 		
 		
-		green "Shadowsocks Password"
-		read -p "(Default Password: zCR&3n*E7du ):" ss_password
-		if [ -z "$ss_password" ];then
-		ss_password="zCR&3n*E7du"
-		fi
-		echo
-		echo "---------------------------"
-		echo "Shadowsocks Password = $ss_password"
-		echo "---------------------------"
-		echo 
+	green "Shadowsocks Password"
+	read -p "(Default Password: zCR&3n*E7du ):" ss_password
+	if [ -z "$ss_password" ];then
+	ss_password="zCR&3n*E7du"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Shadowsocks Password = $ss_password"
+	echo "---------------------------"
+	echo 
+	fi
+
+	
+	green "Enable Transport Plugin"
+	read -p "(Default : false 'false/true'):" enable_tp
+	if [ -z "$enable_tp" ];then
+	enable_tp="false"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Enable Transport Plugin = $enable_tp"
+	echo "---------------------------"
+	echo 
+	
+	
+	if [ "$enable_tp" == "true" ];then
 		
-		green "Enable Transport Plugin"
-		read -p "(Default : false 'false/true'):" enable_tp
-		if [ -z "$enable_tp" ];then
-		enable_tp="false"
-		fi
-		echo
-		echo "---------------------------"
-		echo "Enable Transport Plugin = $enable_tp"
-		echo "---------------------------"
-		echo 
-		
-		if [ "$enable_tp" == "true" ];then
-		
-			green "Plugin Type"
-			read -p "(Default : plaintext 'shadowsocks / plaintext / other' ):" plugin_type
-			if [ -z "$plugin_type" ];then
-			plugin_type="plaintext"
-			fi
-			echo
-			echo "---------------------------"
-			echo "Plugin Option = $plugin_type"
-			echo "---------------------------"
-			echo 
+	green "Plugin Type"
+	read -p "(Default : plaintext 'shadowsocks / plaintext / other' ):" plugin_type
+	if [ -z "$plugin_type" ];then
+	plugin_type="plaintext"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Plugin Type = $plugin_type"
+	echo "---------------------------"
+	echo 
 			
-			
-			if [ "$plugin_type" == "shadowsocks" ];then
-			
-				green "Plugin Command"
-				read -p "(Default : ./v2ray-plugin ):" plugin_command
-				if [ -z "$plugin_command" ];then 
-				plugin_command="./v2ray-plugin"
-				fi
-				echo
-				echo "---------------------------"
-				echo "Plugin Command = $plugin_command"
-				echo "---------------------------"
-				echo	
+	green "Plugin Command"
+	read -p "(Default : ./v2ray-plugin ):" plugin_command
+	if [ -z "$plugin_command" ];then 
+	plugin_command="./v2ray-plugin"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Plugin Command = $plugin_command"
+	echo "---------------------------"
+	echo	
 				
     green "Plugin Argument"
     read -p "(Default : "-server", "-host", "www.baidu.com" ):" plugin_arg
@@ -357,8 +356,7 @@ pre_install(){
     echo
 	
     fi
-    fi
-    fi
+    
     
     green "Enable Forward Proxy (socks5)"
     read -p "(Default : false  'false/true'):" forward_proxy
@@ -372,44 +370,45 @@ pre_install(){
     echo 
     
     if [ "$forward_proxy" == "true" ];then
-		green "Proxy Address"
-		read -p "(Default : ${your_domain} ):" proxy_addr
-		if [ -z "$proxy_addr" ];then
-		proxy_addr="$your_domain"
-		fi
-		echo
-		echo "---------------------------"
-		echo "Proxy Address = $proxy_addr"
-		echo "---------------------------"
-		echo 
+	green "Proxy Address"
+	read -p "(Default : ${your_domain} ):" proxy_addr
+	if [ -z "$proxy_addr" ];then
+	proxy_addr="$your_domain"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Proxy Address = $proxy_addr"
+	echo "---------------------------"
+	echo 
 		
-		green "Proxy Port"
-		read -p "(Default : 1080 ):" proxy_port
-		if [ -z "$proxy_port" ];then
-		proxy_port="1080"
-		fi
-		echo
-		echo "---------------------------"
-		echo "Proxy Port = $proxy_port"
-		echo "---------------------------"
-		echo 
+	green "Proxy Port"
+	read -p "(Default : 1080 ):" proxy_port
+	if [ -z "$proxy_port" ];then
+	proxy_port="1080"
+	fi
+	echo
+	echo "---------------------------"
+	echo "Proxy Port = $proxy_port"
+	echo "---------------------------"
+	echo 
 		
-		green "Username"
-		read -p "(Default :  ):" username
-		echo
-		echo "---------------------------"
-		echo "Username = $username"
-		echo "---------------------------"
-		echo 
+	green "Username"
+	read -p "(Default :  ):" username
+	echo
+	echo "---------------------------"
+	echo "Username = $username"
+	echo "---------------------------"
+	echo 
 		
-		green "Password"
-		read -p "(Default :  ):" password
-		echo
-		echo "---------------------------"
-		echo "Password = $password"
-		echo "---------------------------"
-		echo 
-    fi  
+	green "Password"
+	read -p "(Default :  ):" password
+	echo
+	echo "---------------------------"
+	echo "Password = $password"
+	echo "---------------------------"
+	echo 
+    fi 
+	
     green "PanelUrl"
     read -p "(Default : No default value):" panelurl
     echo
@@ -482,4 +481,3 @@ start_menu(){
 }
 
 start_menu
-
