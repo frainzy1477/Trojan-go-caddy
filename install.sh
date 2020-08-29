@@ -78,7 +78,7 @@ cd /etc/trojan-go
 wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 	
-
+if [ "$enable_websocket" == "true" ];then
 cat > /etc/trojan-go/docker-compose.yml <<-EOF
 version: '2'
 
@@ -118,10 +118,11 @@ cat > /etc/trojan-go/Caddyfile <<-EOF
   #realip cloudflare
 }
 EOF
+fi
 
-if [ ! -f /etc/systemd/system/trojan-go-$your_domain.service ];then	
-touch /etc/systemd/system/trojan-go-$your_domain.service
-cat >/etc/systemd/system/trojan-go-$your_domain.service << EOF
+if [ ! -f /etc/systemd/system/trojan-go-"${your_domain}".service ];then	
+touch /etc/systemd/system/trojan-go-"${your_domain}".service
+cat >/etc/systemd/system/trojan-go-"${your_domain}".service << EOF
 [Unit]
 Description=trojan
 Documentation=https://github.com/p4gefau1t/trojan-go
@@ -131,7 +132,7 @@ After=network.target
 Type=simple
 StandardError=journal
 PIDFile=/etc/trojan-go/trojan-go.pid
-ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/$your_domain.json
+ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/"${your_domain}".json
 ExecReload=
 ExecStop=/etc/trojan-go/trojan-go
 LimitNOFILE=51200
@@ -237,8 +238,10 @@ if [ $? = 0 ]; then
 	#systemctl enable trojan-go
         #systemctl restart trojan-go && systemctl daemon-reload
 	#systemctl status trojan-go
+	if [ "$enable_websocket" == "true" ];then
 	docker-compose up -d
 	sleep 5
+	fi
 	systemctl enable trojan-go
         systemctl restart trojan-go
 	systemctl status trojan-go
