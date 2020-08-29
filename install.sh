@@ -169,8 +169,8 @@ EOF
 
 
 if [ $? = 0 ]; then
-	systemctl enable trojan-go
-        systemctl restart trojan-go && systemctl daemon-reload
+	#systemctl enable trojan-go
+        #systemctl restart trojan-go && systemctl daemon-reload
 	#systemctl status trojan-go
 	green "======================================================================"
 	green "Trojan installation complete"
