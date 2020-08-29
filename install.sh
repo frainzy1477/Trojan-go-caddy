@@ -69,7 +69,7 @@ mkdir -p /tmp/trojan-go
 sleep 1
 cd /tmp/trojan-go
 
-wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
+https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
 unzip trojan-go-linux-amd64
 cp /tmp/trojan-go/trojan-go /etc/trojan-go/
 chmod +x /etc/trojan-go/trojan-go
