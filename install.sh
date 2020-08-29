@@ -79,6 +79,46 @@ wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 	
 
+cat > /etc/trojan-go/docker-compose.yml <<-EOF
+version: '2'
+
+services:
+  caddy:
+    image: frainzy1477/caddyy
+    restart: always
+    environment:
+      - ACME_AGREE=true
+      - TROJAN_DOMAIN=$your_domain
+      - TROJAN_PATH=/trojan
+      - TROJAN_EMAIL=allsafe@my.com
+      - TROJAN_PORT=$trojan_port
+      - TROJAN_OUTSIDE_PORT=443
+    network_mode: "host"
+    volumes:
+      - ./.caddy:/root/.caddy
+      - ./Caddyfile:/etc/Caddyfile
+EOF
+
+cat > /etc/trojan-go/Caddyfile <<-EOF
+{$TROJAN_DOMAIN}:{$TROJAN_OUTSIDE_PORT}
+{
+  root /srv/www
+  log ./caddy.log
+  proxy {$TROJAN_PATH} 127.0.0.1:{$TROJAN_PORT} {
+    websocket
+    header_upstream -Origin
+  }
+  gzip
+  tls {$TROJAN_EMAIL} {
+    protocols tls1.2 
+	#tls1.3
+    # remove comment if u want to use cloudflare (for DNS challenge authentication)
+    # dns cloudflare
+  }
+  #realip cloudflare
+}
+EOF
+
 rm -rf /etc/trojan-go/$your_domain.json 2>/dev/null
 cat > /etc/trojan-go/$your_domain.json <<-EOF
 {
@@ -96,8 +136,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/fullchain.crt",
-    "key": "/etc/trojan-go/privkey.key",
+    "cert": "/etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.crt",
+    "key": "/etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -169,8 +209,11 @@ EOF
 
 if [ $? = 0 ]; then
 	#systemctl enable trojan-go
-    #systemctl restart trojan-go && systemctl daemon-reload
+        #systemctl restart trojan-go && systemctl daemon-reload
 	#systemctl status trojan-go
+	docker-compose up -d
+	sleep 5
+	
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
