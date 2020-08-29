@@ -105,9 +105,9 @@ EOF
 
 fi
 
-if [ ! -f /etc/systemd/system/trojan-go-"${your_domain}".service ];then	
-touch /etc/systemd/system/trojan-go-"${your_domain}".service
-cat >/etc/systemd/system/trojan-go-"${your_domain}".service << EOF
+if [ ! -f /etc/systemd/system/trojan-go-${your_domain}.service ];then	
+touch /etc/systemd/system/trojan-go-${your_domain}.service
+cat >/etc/systemd/system/trojan-go-${your_domain}.service << EOF
 [Unit]
 Description=trojan
 Documentation=https://github.com/p4gefau1t/trojan-go
@@ -116,8 +116,8 @@ After=network.target
 [Service]
 Type=simple
 StandardError=journal
-PIDFile=/etc/trojan-go/trojan-go.pid
-ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/"${your_domain}".json
+PIDFile=/etc/trojan-go/trojan.pid
+ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/${your_domain}.json
 ExecReload=
 ExecStop=/etc/trojan-go/trojan-go
 LimitNOFILE=51200
@@ -148,8 +148,8 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
   "ssl": {
     "verify": true,
     "verify_hostname": true,
-    "cert": "/etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.crt",
-    "key": "/etc/trojan-go/.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.key",
+    "cert": "./.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.crt",
+    "key": "./.caddy/acme/acme-v02.api.letsencrypt.org/sites/$your_domain/$your_domain.key",
     "key_password": "",
     "cipher": "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:AES128-SHA:AES256-SHA:DES-CBC3-SHA",
     "curves": "",
@@ -206,6 +206,11 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "enabled": $enable_websocket,
     "path": "$websocket_path",
     "hostname": "$websocket_host"
+  },
+  "api": {
+    "enabled": true,
+    "api_addr": "127.0.0.1",
+    "api_port": 8000
   },
   "webapi":{
     "enabled": true, 
