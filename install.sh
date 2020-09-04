@@ -382,6 +382,7 @@ start_menu(){
     echo " ======================================= "
     echo
     green " 1. Install trojan-go"
+    green " 2. Update trojan-go"
     red " 0. Quit"
     echo
     read -p "Please enter the number:" num
