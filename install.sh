@@ -8,7 +8,31 @@ green(){
 red(){
     echo -e "\033[31m\033[01m$1\033[0m"
 }
-
+function update_trojan(){
+	systemctl stop trojan-go-*
+	systemctl daemon-reload
+	cd /etc/trojan-go
+	rm -rf trojan-go geosite.dat geoip.dat
+	mkdir -p /tmp/trojan-go 
+	cd /tmp/trojan-go
+	version=`wget -qO- https://github.com/frainzy1477/trojan-go-sspanel/tags | grep "/frainzy1477/trojan-go-sspanel/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
+	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/$version/trojan-go-linux-amd64.zip
+	unzip trojan-go-linux-amd64
+	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
+	chmod +x /etc/trojan-go/trojan-go
+	rm -rf /tmp/trojan-go >/dev/null 2>&1
+	
+	cd /etc/trojan-go
+	wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
+	wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
+	
+        systemctl restart trojan-go-$your_domain
+	systemctl daemon-reload
+	systemctl status trojan-go-$your_domain
+	green "======================================================================"
+	green "Update Trojan completed"
+	echo "======================================================================"
+}
 
 function install_trojan(){
 
@@ -214,8 +238,9 @@ if [ $? = 0 ]; then
 	fi
 	systemctl enable trojan-go-$your_domain
         systemctl restart trojan-go-$your_domain
-	systemctl status trojan-go-$your_domain
 	systemctl daemon-reload
+	systemctl status trojan-go-$your_domain
+
 	green "======================================================================"
 	green "Trojan installation complete"
 	echo "======================================================================"
@@ -329,7 +354,7 @@ pre_install(){
 	fi
     echo
     echo "---------------------------"
-    echo "Enable Transport Plugin = $node_id"
+    echo "Node Id = $node_id"
     echo "---------------------------"
     echo 
     
@@ -363,6 +388,9 @@ start_menu(){
     case "$num" in
     1)
     install_trojan
+    ;;
+    2)
+    update_trojan
     ;;
     0)
     exit 1
