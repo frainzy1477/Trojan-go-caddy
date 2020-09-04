@@ -91,8 +91,8 @@ fi
 	
 mkdir -p /tmp/trojan-go 
 cd /tmp/trojan-go
-
-wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/v0.8.2.1/trojan-go-linux-amd64.zip
+version=`wget -qO- https://github.com/frainzy1477/trojan-go-sspanel/tags | grep "/frainzy1477/trojan-go-sspanel/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
+wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/$version/trojan-go-linux-amd64.zip
 unzip trojan-go-linux-amd64
 cp /tmp/trojan-go/trojan-go /etc/trojan-go/
 chmod +x /etc/trojan-go/trojan-go
