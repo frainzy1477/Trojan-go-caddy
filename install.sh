@@ -26,9 +26,9 @@ function update_trojan(){
 	wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 	wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 	
-        systemctl restart trojan-go-$your_domain
+        systemctl restart trojan-go-*
 	systemctl daemon-reload
-	systemctl status trojan-go-$your_domain
+	systemctl status trojan-go-*
 	green "======================================================================"
 	green "Update Trojan completed"
 	echo "======================================================================"
