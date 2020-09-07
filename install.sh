@@ -144,12 +144,15 @@ cat >/etc/systemd/system/trojan-go-${your_domain}.service << EOF
 [Unit]
 Description=trojan
 Documentation=https://github.com/p4gefau1t/trojan-go
-After=network.target
+After=network.target nss-lookup.target
 
 [Service]
 Type=simple
 StandardError=journal
 PIDFile=/etc/trojan-go/trojan.pid
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
 ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/${your_domain}.json
 ExecReload=
 ExecStop=/etc/trojan-go/trojan-go
