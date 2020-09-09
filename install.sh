@@ -36,18 +36,6 @@ function update_trojan(){
 
 function install_trojan(){
 
-green "Enter system type By number [1]centos [2]debian/ubuntu "
-read -p "(Default : 1   ):" system_type
-if [ -z "$systemPackage" ];then
-system_type="1"
-fi
-if [ "$system_type" == "1" ];then
-systemPackage="yum"
-elif [ "$system_type" == "2" ];then
-systemPackage="apt-get"
-fi
-	
-
 Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
 Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
 if [ -n "$Port80" ]; then
@@ -68,9 +56,9 @@ fi
 
 pre_install  
 
-$systemPackage install -y epel-release
-$systemPackage -y update
-$systemPackage -y install  git python-tools python-pip curl wget unzip zip socat
+yum install -y epel-release
+yum -y update
+yum -y install  git python-tools python-pip curl wget unzip zip socat
 	
 checkDocker=$(which docker)
 checkDockerCompose=$(which docker-compose)
@@ -137,6 +125,8 @@ services:
 EOF
 
 fi
+
+firewall_allow
 
 if [ ! -f /etc/systemd/system/trojan-go-${your_domain}.service ];then	
 touch /etc/systemd/system/trojan-go-${your_domain}.service
@@ -250,6 +240,22 @@ if [ $? = 0 ]; then
 fi	
 
 
+}
+
+function firewall_allow(){
+	systemctl stop firewalld
+	systemctl mask firewalld
+	yum install iptables-services -y
+	chkconfig iptables on
+	iptables -A INPUT -p tcp -m multiport --dports 9000:65500 -j ACCEPT 
+	iptables -A INPUT -p udp -m multiport --dports 9000:65500 -j ACCEPT 
+	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT 
+	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT 
+	iptables -A INPUT -p udp -m state --state NEW -m udp --dport 53 -j ACCEPT 
+	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
+	iptables -A INPUT -p udp -m state --state NEW -m udp --dport 1080 -j ACCEPT 
+	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 1080 -j ACCEPT 
+	systemctl start iptables
 }
 
 function install_docker(){
@@ -377,8 +383,8 @@ pre_install(){
 start_menu(){
     clear
     echo " ======================================= "
-    green " Introduction: One-click installation trojan "
-    green " System： centos7+/debian9+/ubuntu16.04+ "
+    green " Introduction: One-click installation trojan-go/ss-panel "
+    green " System： centos7+"
     blue " Statement："
     green " *Please do not use this script in any production environment"
     green " *Please do not have other programs occupying ports 80 and 443 "
