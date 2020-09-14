@@ -1,4 +1,4 @@
-STANDARD INSTALL
+STANDARD INSTALL (FOR CENTOS 7+)
 ```
 cd /home && \
 rm -rf install.sh && \
