@@ -251,6 +251,7 @@ function firewall_allow(){
 	iptables -A INPUT -p udp -m multiport --dports 9000:65500 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT 
+	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport $trojan_port -j ACCEPT 
 	iptables -A INPUT -p udp -m state --state NEW -m udp --dport 53 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
 	iptables -A INPUT -p udp -m state --state NEW -m udp --dport 1080 -j ACCEPT 
@@ -317,9 +318,9 @@ pre_install(){
     
     if [ "$enable_websocket" == "true" ];then
     green "Websocket Path"
-    read -p "(Default Path: /trojan):" websocket_path
+    read -p "(Default Path: /):" websocket_path
     if [ -z "${websocket_path}" ];then
-	websocket_path="/trojan"
+	websocket_path="/"
 	fi
     echo
     echo "---------------------------"
@@ -328,7 +329,7 @@ pre_install(){
     echo 
     
     green "Websocket Hostname"
-    read -p "(Default Hostname: ${your_domain}):" websocket_host
+    read -p "(Default Hostname: ${your_domain} or your cdn address here):" websocket_host
     if [ -z "$websocket_host" ];then
 	websocket_host="$your_domain"
 	fi
