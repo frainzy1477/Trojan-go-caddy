@@ -10,7 +10,7 @@ bash install.sh
 ```
 systemctl enable trojan-go-*
 systemctl start trojan-go-*
-
+systemctl stop trojan-go-*
 systemctl restart trojan-go-*
 systemctl daemon-reload
 systemctl status trojan-go-*
