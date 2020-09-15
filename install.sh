@@ -8,9 +8,71 @@ green(){
 red(){
     echo -e "\033[31m\033[01m$1\033[0m"
 }
+
+
+osRelease=""
+osSystemPackage=""
+osSystemmdPath=""
+
+function getLinuxOSVersion(){
+    if [[ -f /etc/redhat-release ]]; then
+        osRelease="centos"
+        osSystemPackage="yum"
+        osSystemmdPath="/usr/lib/systemd/system/"
+    elif cat /etc/issue | grep -Eqi "debian"; then
+        osRelease="debian"
+        osSystemPackage="apt-get"
+        osSystemmdPath="/lib/systemd/system/"
+    elif cat /etc/issue | grep -Eqi "ubuntu"; then
+        osRelease="ubuntu"
+        osSystemPackage="apt-get"
+        osSystemmdPath="/lib/systemd/system/"
+    elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
+        osRelease="centos"
+        osSystemPackage="yum"
+        osSystemmdPath="/usr/lib/systemd/system/"
+    elif cat /proc/version | grep -Eqi "debian"; then
+        osRelease="debian"
+        osSystemPackage="apt-get"
+        osSystemmdPath="/lib/systemd/system/"
+    elif cat /proc/version | grep -Eqi "ubuntu"; then
+        osRelease="ubuntu"
+        osSystemPackage="apt-get"
+        osSystemmdPath="/lib/systemd/system/"
+    elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
+        osRelease="centos"
+        osSystemPackage="yum"
+        osSystemmdPath="/usr/lib/systemd/system/"
+    fi
+    echo "OS info: ${osRelease}, ${osSystemPackage}, ${osSystemmdPath}"
+}
+
+
+function checkport(){
+	Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
+	Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
+	if [ -n "$Port80" ]; then
+	    process80=`netstat -tlpn | awk -F '[: ]+' '$5=="80"{print $9}'`
+	    echo "==========================================================="
+	    red "It is detected that port 80 is occupied, the occupation process is:${process80}，This installation is cancelled"
+	    echo "==========================================================="
+	    exit 1
+	fi
+	if [ -n "$Port443" ]; then
+	    process443=`netstat -tlpn | awk -F '[: ]+' '$5=="443"{print $9}'`
+	    echo "============================================================="
+	    red "It is detected that port 443 is occupied, the occupation process is：${process443}，This installation is cancelled"
+	    echo "============================================================="
+	    exit 1
+	fi
+}
+
+
 function update_trojan(){
+
 	systemctl stop trojan-go-*
 	systemctl daemon-reload
+	
 	cd /etc/trojan-go
 	rm -rf trojan-go geosite.dat geoip.dat
 	mkdir -p /tmp/trojan-go 
@@ -26,9 +88,11 @@ function update_trojan(){
 	wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
 	wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
 	
+	
         systemctl restart trojan-go-*
 	systemctl daemon-reload
 	systemctl status trojan-go-*
+	
 	green "======================================================================"
 	green "Update Trojan completed"
 	echo "======================================================================"
@@ -36,74 +100,101 @@ function update_trojan(){
 
 function install_trojan(){
 
-Port80=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 80`
-Port443=`netstat -tlpn | awk -F '[: ]+' '$1=="tcp"{print $5}' | grep -w 443`
-if [ -n "$Port80" ]; then
-    process80=`netstat -tlpn | awk -F '[: ]+' '$5=="80"{print $9}'`
-    echo "==========================================================="
-    red "It is detected that port 80 is occupied, the occupation process is:${process80}，This installation is over"
-    echo "==========================================================="
-    exit 1
-fi
-if [ -n "$Port443" ]; then
-    process443=`netstat -tlpn | awk -F '[: ]+' '$5=="443"{print $9}'`
-    echo "============================================================="
-    red "It is detected that port 443 is occupied, the occupation process is：${process443}，This installation is over"
-    echo "============================================================="
-    exit 1
-fi
+	getLinuxOSVersion
 
+	checkport
 
-pre_install  
+	pre_install  
 
-yum install -y epel-release
-yum -y update
-yum -y install  git python-tools python-pip curl wget unzip zip socat
-	
-checkDocker=$(which docker)
-checkDockerCompose=$(which docker-compose)
+	if [ "$osRelease" == "centos" ]; then
+		if  [ -n "$(grep ' 6\.' /etc/redhat-release)" ] ; then
+		    red "==============="
+		    red "System not suppotred"
+		    red "==============="
+		    exit
+		fi
 
-if [ "$checkDocker" == "" ]; then
-install_docker
-fi
+		if  [ -n "$(grep ' 5\.' /etc/redhat-release)" ] ; then
+		    red "==============="
+		    red "System not suppotred"
+		    red "==============="
+		    exit
+		fi
 
-if [ "$checkDockerCompose" == "" ]; then
-install_docker_compose
-fi	
+		sudo systemctl stop firewalld
+		sudo systemctl disable firewalld
+		rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+		$osSystemPackage update -y
+		$osSystemPackage install epel-release curl wget git python-tools unzip zip tar socat -y
+		$osSystemPackage install xz -y
+		$osSystemPackage install iputils-ping -y
 
-rm -rf /tmp/trojan-go 
-	
-if [ ! -d /etc/trojan-go ];then
-	mkdir -p /etc/trojan-go
-fi
-	
-mkdir -p /tmp/trojan-go 
-cd /tmp/trojan-go
-version=`wget -qO- https://github.com/frainzy1477/trojan-go-sspanel/tags | grep "/frainzy1477/trojan-go-sspanel/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
-wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/$version/trojan-go-linux-amd64.zip
-unzip trojan-go-linux-amd64
-cp /tmp/trojan-go/trojan-go /etc/trojan-go/
-chmod +x /etc/trojan-go/trojan-go
-rm -rf /tmp/trojan-go >/dev/null 2>&1
-	
-cd /etc/trojan-go
-wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
-wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
+	elif [ "$osRelease" == "ubuntu" ]; then
+		if  [ -n "$(grep ' 14\.' /etc/os-release)" ] ;then
+		    red "==============="
+		    red "System not suppotred"
+		    red "==============="
+		    exit
+		fi
+		if  [ -n "$(grep ' 12\.' /etc/os-release)" ] ;then
+		    red "==============="
+		    red "System not suppotred"
+		    red "==============="
+		    exit
+		fi
 
-cd /etc/trojan-go
-	
-if [ ! -f /etc/trojan-go/acme/acme.sh ];then
-wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
-chmod +x acme.sh
-./acme.sh --install --home /etc/trojan-go/acme
-fi
-	
-bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
-bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
+		sudo systemctl stop ufw
+		sudo systemctl disable ufw
+		$osSystemPackage update -y
+		$osSystemPackage install curl wget python-tools git unzip zip tar socat -y
+		$osSystemPackage install xz-utils -y
+		$osSystemPackage install iputils-ping -y
+	fi
+	    
+	rm -rf /tmp/trojan-go 
+
+	if [ ! -d /etc/trojan-go ];then
+		mkdir -p /etc/trojan-go
+	fi
+
+	mkdir -p /tmp/trojan-go 
+	cd /tmp/trojan-go
+	version=`wget -qO- https://github.com/frainzy1477/trojan-go-sspanel/tags | grep "/frainzy1477/trojan-go-sspanel/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
+	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/$version/trojan-go-linux-amd64.zip
+	unzip trojan-go-linux-amd64
+	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
+	chmod +x /etc/trojan-go/trojan-go
+	rm -rf /tmp/trojan-go >/dev/null 2>&1
+
+	cd /etc/trojan-go
+	wget https://raw.githubusercontent.com/v2fly/geoip/release/geoip.dat
+	wget https://raw.githubusercontent.com/v2fly/domain-list-community/release/dlc.dat -O geosite.dat
+
+	cd /etc/trojan-go
+
+	if [ ! -f /etc/trojan-go/acme/acme.sh ];then
+	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
+	chmod +x acme.sh
+	./acme.sh --install --home /etc/trojan-go/acme
+	fi
+
+	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
+	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
 	
 if [ "$enable_websocket" == "true" ];then
 
-wget https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/Caddyfile
+	checkDocker=$(which docker)
+	checkDockerCompose=$(which docker-compose)
+
+	if [ "$checkDocker" == "" ]; then
+		install_docker
+	fi
+
+	if [ "$checkDockerCompose" == "" ]; then
+		install_docker_compose
+	fi
+
+	wget https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/Caddyfile
 
 cat > /etc/trojan-go/docker-compose.yml <<-EOF
 version: '2'
@@ -128,11 +219,11 @@ fi
 
 firewall_allow
 
-if [ ! -f /etc/systemd/system/trojan-go-${your_domain}.service ];then	
-touch /etc/systemd/system/trojan-go-${your_domain}.service
-cat >/etc/systemd/system/trojan-go-${your_domain}.service << EOF
+if [ ! -f ${osSystemmdPath}trojan-go-${your_domain}.service ];then	
+touch ${osSystemmdPath}trojan-go-${your_domain}.service
+cat >${osSystemmdPath}trojan-go-${your_domain}.service << EOF
 [Unit]
-Description=trojan
+Description=trojan-go
 Documentation=https://github.com/p4gefau1t/trojan-go
 After=network.target nss-lookup.target
 
@@ -144,16 +235,15 @@ CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/etc/trojan-go/trojan-go -config /etc/trojan-go/${your_domain}.json
-ExecReload=
+ExecReload=/bin/kill -HUP \$MAINPID
 ExecStop=/etc/trojan-go/trojan-go
 LimitNOFILE=51200
 Restart=on-failure
-RestartSec=1s
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target  
 EOF
-systemctl daemon-reload
 fi
 
   
@@ -209,13 +299,16 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "geoip": "/etc/trojan-go/geoip.dat",
     "geosite": "/etc/trojan-go/geosite.dat"
   },
+  "transport_plugin": {
+    "enabled": true,
+    "type": "plaintext"
+  },
   "websocket": {
     "enabled": $enable_websocket,
     "path": "$websocket_path",
     "hostname": "$websocket_host"
   },
   "webapi":{
-    "enabled": true, 
     "node_id":   $node_id,
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
@@ -229,13 +322,19 @@ if [ $? = 0 ]; then
 	docker-compose up -d
 	sleep 5
 	fi
+	
+	trojanversion =`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
+	
+	systemctl daemon-reload
 	systemctl enable trojan-go-$your_domain
         systemctl restart trojan-go-$your_domain
 	systemctl daemon-reload
 	systemctl status trojan-go-$your_domain
-
+	
 	green "======================================================================"
-	green "Trojan installation complete"
+	green "INSTALLATION COMPLETED"
+	green "OS VERSION: ${osRelease}"
+	green "TROJAN-GO VERSION : ${trojanversion}"
 	echo "======================================================================"
 fi	
 
@@ -245,18 +344,14 @@ fi
 function firewall_allow(){
 	systemctl stop firewalld
 	systemctl mask firewalld
-	yum install iptables-services -y
+	osSystemPackage install iptables-services -y
 	chkconfig iptables on
-	iptables -A INPUT -p tcp -m multiport --dports 9000:65500 -j ACCEPT 
-	iptables -A INPUT -p udp -m multiport --dports 9000:65500 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 443 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport $trojan_port -j ACCEPT 
 	iptables -A INPUT -p udp -m state --state NEW -m udp --dport 53 -j ACCEPT 
 	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 80 -j ACCEPT
-	iptables -A INPUT -p udp -m state --state NEW -m udp --dport 1080 -j ACCEPT 
-	iptables -A INPUT -p tcp -m state --state NEW -m tcp --dport 1080 -j ACCEPT 
-	systemctl start iptables
+	systemctl restart iptables
 }
 
 function install_docker(){
@@ -385,7 +480,7 @@ start_menu(){
     clear
     echo " ======================================= "
     green " Introduction: One-click installation trojan-go/ss-panel "
-    green " System： centos7+"
+    green " Supported Systems： centos7+/7.x/8.x+ & ubuntu 16.04/18.04/19.10/20.04"
     blue " Statement："
     green " *Please do not use this script in any production environment"
     green " *Please do not have other programs occupying ports 80 and 443 "
