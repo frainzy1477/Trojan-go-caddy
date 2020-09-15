@@ -15,7 +15,11 @@ osSystemPackage=""
 osSystemmdPath=""
 
 function getLinuxOSVersion(){
-    if [[ -f /etc/redhat-release ]]; then
+    if [[ cat /etc/os-release  |  awk -F 'VERSION_ID=' '{print $2}' | sed -n 5P | sed s/\"//g == "7" ]];then
+        osRelease="centos"
+        osSystemPackage="yum"
+        osSystemmdPath="/etc/systemd/system/"
+    elif [[ -f /etc/redhat-release ]]; then
         osRelease="centos"
         osSystemPackage="yum"
         osSystemmdPath="/usr/lib/systemd/system/"
@@ -92,7 +96,7 @@ function update_trojan(){
         systemctl restart trojan-go-*
 	systemctl daemon-reload
 	systemctl status trojan-go-*
-	trojanversion =`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
+	trojanversion=`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
 	green "======================================================================"
 	green "UPDATE COMPLETED"
 	green "OS VERSION: ${osRelease}"
@@ -325,7 +329,7 @@ if [ $? = 0 ]; then
 	sleep 5
 	fi
 	
-	trojanversion =`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
+	trojanversion=`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
 	
 	systemctl daemon-reload
 	systemctl enable trojan-go-$your_domain
