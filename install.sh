@@ -69,7 +69,7 @@ function checkport(){
 
 
 function update_trojan(){
-
+	getLinuxOSVersion
 	systemctl stop trojan-go-*
 	systemctl daemon-reload
 	
@@ -92,9 +92,11 @@ function update_trojan(){
         systemctl restart trojan-go-*
 	systemctl daemon-reload
 	systemctl status trojan-go-*
-	
+	trojanversion =`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
 	green "======================================================================"
-	green "Update Trojan completed"
+	green "UPDATE COMPLETED"
+	green "OS VERSION: ${osRelease}"
+	green "TROJAN-GO VERSION : ${trojanversion}"
 	echo "======================================================================"
 }
 
