@@ -15,8 +15,7 @@ osSystemPackage=""
 osSystemmdPath=""
 
 function getLinuxOSVersion(){
-    check=`cat /etc/os-release  |  awk -F 'VERSION_ID=' '{print $2}' | sed -n 5P | sed s/\"//g`
-    if [[  $[check} == "7" ]]; then
+    if [[  -d /etc/systemd/system/ ]] & [[ -f /etc/redhat-release ]]; then
         osRelease="centos"
         osSystemPackage="yum"
         osSystemmdPath="/etc/systemd/system/"
