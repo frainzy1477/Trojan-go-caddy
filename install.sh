@@ -99,7 +99,6 @@ function update_trojan(){
 	trojanversion=`/etc/trojan-go/trojan-go -version | awk '{print $2}' | sed -n 1P`
 	green "======================================================================"
 	green "UPDATE COMPLETED"
-	green "OS VERSION: ${osRelease}"
 	green "TROJAN-GO VERSION : ${trojanversion}"
 	echo "======================================================================"
 }
@@ -339,7 +338,6 @@ if [ $? = 0 ]; then
 	
 	green "======================================================================"
 	green "INSTALLATION COMPLETED"
-	green "OS VERSION: ${osRelease}"
 	green "TROJAN-GO VERSION : ${trojanversion}"
 	echo "======================================================================"
 fi	
