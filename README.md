@@ -1,4 +1,4 @@
-STANDARD INSTALL (FOR CENTOS7+/7.x/8.x+ & UBUNTU 16.04/18.04/19.10/20.04)
+STANDARD INSTALL (FOR CENTOS7+/7.x/8.x+ & UBUNTU 16.04/18.04/20.04)
 ```
 cd /home && \
 rm -rf install.sh && \
