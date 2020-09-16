@@ -317,8 +317,7 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "node_id":   $node_id,
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
-    "check_rate": $check_rate,
-    "speedtest_hours": $speedtest_hours
+    "check_rate": $check_rate
   } 
 }
 EOF
@@ -478,18 +477,7 @@ pre_install(){
     echo "Check Rate = $check_rate"
     echo "---------------------------"
     echo 
-    
-    green "Speedtest"
-    read -p "(Default : 3 ):" speedtest_hours
-    if [ -z "$speedtest_hours" ];then
-	speedtest_hours=3
-	fi
-    echo
-    echo "---------------------------"
-    echo "Speedtest = $speedtest_hours"
-    echo "---------------------------"
-    echo 
-    
+ 
 }   
 
 start_menu(){
