@@ -314,10 +314,12 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "hostname": "$websocket_host"
   },
   "webapi":{
+    "enabled": $enable_webapi,
     "node_id":   $node_id,
     "panelUrl": "$panelurl",
     "panelKey": "$panelkey",
-    "check_rate": $check_rate
+    "check_rate": $check_rate,
+    "speedtest_hours": $speedtest_hours
   } 
 }
 EOF
@@ -439,6 +441,19 @@ pre_install(){
     echo     
     fi
 
+    green "Enable WebAPI"
+    read -p "(Default : true 'true/false'):" enable_webapi
+    if [ -z "$enable_webapi" ];then 
+	enable_webapi="true"
+	fi
+    echo
+    echo "---------------------------"
+    echo "Enable WebAPI = $enable_webapi"
+    echo "---------------------------"
+    echo
+    
+    if [ "$enable_webapi" == "true" ];then
+    
     green "PanelUrl"
     read -p "(Default : No default value):" panelurl
     echo
@@ -477,7 +492,20 @@ pre_install(){
     echo "Check Rate = $check_rate"
     echo "---------------------------"
     echo 
- 
+    
+    green "Speedtest"
+    read -p "(Default : 1 ):" speedtest_hours
+    if [ -z "$speedtest_hours" ];then
+	speedtest_hours=1
+	fi
+    echo
+    echo "---------------------------"
+    echo "Speedtest = $speedtest_hours"
+    echo "---------------------------"
+    echo
+    
+    fi
+    
 }   
 
 start_menu(){
