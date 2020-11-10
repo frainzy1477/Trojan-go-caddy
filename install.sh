@@ -304,10 +304,6 @@ cat > /etc/trojan-go/$your_domain.json <<-EOF
     "geoip": "/etc/trojan-go/geoip.dat",
     "geosite": "/etc/trojan-go/geosite.dat"
   },
-  "transport_plugin": {
-    "enabled": true,
-    "type": "plaintext"
-  },
   "websocket": {
     "enabled": $enable_websocket,
     "path": "$websocket_path",
