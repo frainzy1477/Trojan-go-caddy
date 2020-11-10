@@ -210,7 +210,7 @@ services:
     restart: always
     environment:
       - ACME_AGREE=false
-      - TROJAN_DOMAIN=$your_domain
+      - TROJAN_DOMAIN=$websocket_host
       - TROJAN_PATH=$websocket_path
       - TROJAN_PORT=$trojan_port
       - TROJAN_OUTSIDE_PORT=80
