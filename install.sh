@@ -81,8 +81,8 @@ function update_trojan(){
 	rm -rf trojan-go geosite.dat geoip.dat
 	mkdir -p /tmp/trojan-go 
 	cd /tmp/trojan-go
-	version=`wget -qO- https://github.com/frainzy1477/trojan-go-sspanel/tags | grep "/frainzy1477/trojan-go-sspanel/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
-	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/$version/trojan-go-linux-amd64.zip
+	version=`wget -qO- https://github.com/frainzy1477/t-go/tags | grep "/frainzy1477/t-go/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
+	wget https://github.com/frainzy1477/t-go/releases/download/$version/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
@@ -164,8 +164,8 @@ function install_trojan(){
 
 	mkdir -p /tmp/trojan-go 
 	cd /tmp/trojan-go
-	version=`wget -qO- https://github.com/frainzy1477/trojan-go-sspanel/tags | grep "/frainzy1477/trojan-go-sspanel/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
-	wget https://github.com/frainzy1477/trojan-go-sspanel/releases/download/$version/trojan-go-linux-amd64.zip
+	version=`wget -qO- https://github.com/frainzy1477/t-go/tags | grep "/frainzy1477/t-go/releases/"| head -n 1| awk -F "/tag/" '{print $2}'| sed 's/\">//'`
+	wget https://github.com/frainzy1477/t-go/releases/download/$version/trojan-go-linux-amd64.zip
 	unzip trojan-go-linux-amd64
 	cp /tmp/trojan-go/trojan-go /etc/trojan-go/
 	chmod +x /etc/trojan-go/trojan-go
@@ -199,7 +199,7 @@ if [ "$enable_websocket" == "true" ];then
 		install_docker_compose
 	fi
 
-	wget https://raw.githubusercontent.com/frainzy1477/trojan-go-sspanel/master/Caddyfile
+	wget https://raw.githubusercontent.com/frainzy1477/t-go/master/Caddyfile
 
 cat > /etc/trojan-go/docker-compose.yml <<-EOF
 version: '2'
