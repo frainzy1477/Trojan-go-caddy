@@ -177,14 +177,12 @@ function install_trojan(){
 
 	cd /etc/trojan-go
 
-	if [ ! -f /etc/trojan-go/acme/acme.sh ];then
-	wget https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh
-	chmod +x acme.sh
-	./acme.sh --install --home /etc/trojan-go/acme
+	if [ ! -f /root/.acme/acme.sh ];then
+	    curl -sL https://get.acme.sh | bash
 	fi
 
-	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --issue -d $your_domain  --standalone --force
-	bash /etc/trojan-go/acme/acme.sh --cert-home /etc/trojan-go --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
+	bash /root/.acme/acme.sh --issue -d $your_domain  --standalone --force
+	bash /root/.acme/acme.sh --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
 	
 if [ "$enable_websocket" == "true" ];then
 
