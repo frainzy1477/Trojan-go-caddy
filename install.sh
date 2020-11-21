@@ -181,8 +181,8 @@ function install_trojan(){
 	    curl -sL https://get.acme.sh | bash
 	fi
 
-	bash /root/.acme/acme.sh --issue -d $your_domain  --standalone --force
-	bash /root/.acme/acme.sh --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
+	bash /root/.acme.sh/acme.sh  --issue -d $your_domain  --standalone --force
+	bash /root/.acme.sh/acme.sh  --installcert -d $your_domain --fullchainpath /etc/trojan-go/fullchain.crt --keypath /etc/trojan-go/privkey.key
 	
 if [ "$enable_websocket" == "true" ];then
 
