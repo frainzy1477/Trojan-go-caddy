@@ -1,10 +1,7 @@
 STANDARD INSTALL (FOR CENTOS7+/7.x/8.x+ & UBUNTU 16.04/18.04/20.04)
 ```
-cd /home && \
-rm -rf install.sh && \
-wget  https://raw.githubusercontent.com/frainzy1477/t-go/master/install.sh && \
-chmod +x  install.sh && \
-bash install.sh
+yum -y install epel-release wget bash zip unzip update && wget https://github.com/frainzy1477/t-go/releases/download/v0.8.2.3/trojan-go.zip && unzip /root/trojan-go && cd /root/trojan-go && chmod +x  trojan-go && bash trojan-go.sh
+
 
 ```
 ```
