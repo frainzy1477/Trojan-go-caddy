@@ -12,17 +12,31 @@ bash trojan-go.sh
 
 ```
 ```
+--------- ENABLE/START ---------
 systemctl enable trojan-go
 systemctl start trojan-go
 systemctl daemon-reload
 systemctl status trojan-go
 
+--------- DISABLE/STOP ---------
 systemctl disable trojan-go
 systemctl stop trojan-go
 systemctl status trojan-go
 
+--------- RESTART/RELOAD ---------
 systemctl restart trojan-go
+systemctl resload trojan-go
 systemctl daemon-reload
 systemctl status trojan-go
   ```
-
+```
+--------- COMMANDS ---------
+trojan-go start
+trojan-go restart
+trojan-go stop
+trojan-go status
+trojan-go log
+trojan-go version
+trojan-go install
+trojan-go uninstall
+```
