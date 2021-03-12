@@ -1,4 +1,4 @@
-STANDARD INSTALL (FOR CENTOS7+/7.x/8.x+ & UBUNTU 16.04/18.04/20.04)
+STANDARD INSTALL
 ```
 yum -y install epel-release wget bash zip unzip update && \
 cd /root && \
